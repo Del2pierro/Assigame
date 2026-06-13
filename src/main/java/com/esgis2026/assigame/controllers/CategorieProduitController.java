@@ -1,45 +1,57 @@
 package com.esgis2026.assigame.controllers;
 
+import com.esgis2026.assigame.dto.CategorieProduitRequest;
+import com.esgis2026.assigame.dto.CategorieProduitResponse;
 import com.esgis2026.assigame.entities.CategorieProduit;
+import com.esgis2026.assigame.mappers.CategorieProduitMapper;
 import com.esgis2026.assigame.services.CategorieProduitService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/categories")
 public class CategorieProduitController {
 
     private final CategorieProduitService categorieProduitService;
+    private final CategorieProduitMapper categorieProduitMapper;
 
-    public CategorieProduitController(CategorieProduitService categorieProduitService) {
+    public CategorieProduitController(CategorieProduitService categorieProduitService, CategorieProduitMapper categorieProduitMapper) {
         this.categorieProduitService = categorieProduitService;
+        this.categorieProduitMapper = categorieProduitMapper;
     }
 
     @PostMapping
-    public ResponseEntity<CategorieProduit> createCategorie(@RequestBody CategorieProduit categorie) {
+    public ResponseEntity<CategorieProduitResponse> createCategorie(@Valid @RequestBody CategorieProduitRequest request) {
+        CategorieProduit categorie = categorieProduitMapper.toEntity(request);
         CategorieProduit created = categorieProduitService.createCategorie(categorie);
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
+        return new ResponseEntity<>(categorieProduitMapper.toResponse(created), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CategorieProduit> getCategorieById(@PathVariable Long id) {
+    public ResponseEntity<CategorieProduitResponse> getCategorieById(@PathVariable Long id) {
         CategorieProduit categorie = categorieProduitService.getCategorieById(id);
-        return ResponseEntity.ok(categorie);
+        return ResponseEntity.ok(categorieProduitMapper.toResponse(categorie));
     }
 
     @GetMapping
-    public ResponseEntity<List<CategorieProduit>> getAllCategories() {
+    public ResponseEntity<List<CategorieProduitResponse>> getAllCategories() {
         List<CategorieProduit> categories = categorieProduitService.getAllCategories();
-        return ResponseEntity.ok(categories);
+        List<CategorieProduitResponse> dtos = categories.stream()
+                .map(categorieProduitMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CategorieProduit> updateCategorie(@PathVariable Long id, @RequestBody CategorieProduit details) {
+    public ResponseEntity<CategorieProduitResponse> updateCategorie(@PathVariable Long id, @Valid @RequestBody CategorieProduitRequest request) {
+        CategorieProduit details = categorieProduitMapper.toEntity(request);
         CategorieProduit updated = categorieProduitService.updateCategorie(id, details);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(categorieProduitMapper.toResponse(updated));
     }
 
     @DeleteMapping("/{id}")
@@ -48,3 +60,5 @@ public class CategorieProduitController {
         return ResponseEntity.noContent().build();
     }
 }
+
+

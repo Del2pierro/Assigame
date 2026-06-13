@@ -1,71 +1,92 @@
 package com.esgis2026.assigame.controllers;
 
+import com.esgis2026.assigame.dto.ProduitRequest;
+import com.esgis2026.assigame.dto.ProduitResponse;
 import com.esgis2026.assigame.entities.Produit;
+import com.esgis2026.assigame.mappers.ProduitMapper;
 import com.esgis2026.assigame.services.ProduitService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/produits")
 public class ProduitController {
 
     private final ProduitService produitService;
+    private final ProduitMapper produitMapper;
 
-    public ProduitController(ProduitService produitService) {
+    public ProduitController(ProduitService produitService, ProduitMapper produitMapper) {
         this.produitService = produitService;
+        this.produitMapper = produitMapper;
     }
 
     @PostMapping("/utilisateur/{idUtilisateur}/categorie/{idCategorie}")
-    public ResponseEntity<Produit> createProduit(@RequestBody Produit produit, 
+    public ResponseEntity<ProduitResponse> createProduit(@Valid @RequestBody ProduitRequest request, 
                                                  @PathVariable Long idUtilisateur, 
                                                  @PathVariable Long idCategorie) {
+        Produit produit = produitMapper.toEntity(request);
         Produit created = produitService.createProduit(produit, idUtilisateur, idCategorie);
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
+        return new ResponseEntity<>(produitMapper.toResponse(created), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Produit> getProduitById(@PathVariable Long id) {
+    public ResponseEntity<ProduitResponse> getProduitById(@PathVariable Long id) {
         Produit produit = produitService.getProduitById(id);
-        return ResponseEntity.ok(produit);
+        return ResponseEntity.ok(produitMapper.toResponse(produit));
     }
 
     @GetMapping
-    public ResponseEntity<List<Produit>> getAllProduits() {
+    public ResponseEntity<List<ProduitResponse>> getAllProduits() {
         List<Produit> produits = produitService.getAllProduits();
-        return ResponseEntity.ok(produits);
+        List<ProduitResponse> dtos = produits.stream()
+                .map(produitMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/utilisateur/{idUtilisateur}")
-    public ResponseEntity<List<Produit>> getProduitsByUtilisateur(@PathVariable Long idUtilisateur) {
+    public ResponseEntity<List<ProduitResponse>> getProduitsByUtilisateur(@PathVariable Long idUtilisateur) {
         List<Produit> produits = produitService.getProduitsByUtilisateur(idUtilisateur);
-        return ResponseEntity.ok(produits);
+        List<ProduitResponse> dtos = produits.stream()
+                .map(produitMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/categorie/{idCategorie}")
-    public ResponseEntity<List<Produit>> getProduitsByCategorie(@PathVariable Long idCategorie) {
+    public ResponseEntity<List<ProduitResponse>> getProduitsByCategorie(@PathVariable Long idCategorie) {
         List<Produit> produits = produitService.getProduitsByCategorie(idCategorie);
-        return ResponseEntity.ok(produits);
+        List<ProduitResponse> dtos = produits.stream()
+                .map(produitMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
  
     @GetMapping("/statut/{statut}")
-    public ResponseEntity<List<Produit>> getProduitsByStatut(@PathVariable String statut) {
+    public ResponseEntity<List<ProduitResponse>> getProduitsByStatut(@PathVariable String statut) {
         List<Produit> produits = produitService.getProduitsByStatut(statut);
-        return ResponseEntity.ok(produits);
+        List<ProduitResponse> dtos = produits.stream()
+                .map(produitMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Produit> updateProduit(@PathVariable Long id, @RequestBody Produit details) {
+    public ResponseEntity<ProduitResponse> updateProduit(@PathVariable Long id, @Valid @RequestBody ProduitRequest request) {
+        Produit details = produitMapper.toEntity(request);
         Produit updated = produitService.updateProduit(id, details);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(produitMapper.toResponse(updated));
     }
 
     @PatchMapping("/{id}/statut/{nouveauStatut}")
-    public ResponseEntity<Produit> changerStatutProduit(@PathVariable Long id, @PathVariable String nouveauStatut) {
+    public ResponseEntity<ProduitResponse> changerStatutProduit(@PathVariable Long id, @PathVariable String nouveauStatut) {
         Produit updated = produitService.changerStatutProduit(id, nouveauStatut);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(produitMapper.toResponse(updated));
     }
 
     @DeleteMapping("/{id}")
@@ -74,3 +95,4 @@ public class ProduitController {
         return ResponseEntity.noContent().build();
     }
 }
+
