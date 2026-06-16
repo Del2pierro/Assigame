@@ -1,0 +1,15 @@
+/**
+ * @file typography.css
+ * @layer Styles — Système typographique
+ * @role  Définit la hiérarchie typographique globale du projet.
+ *        Importe la police Google Fonts (ex: Inter ou Outfit).
+ *        Définit les tailles, graisses et interlignes via des variables CSS.
+ *
+ * @variables attendues
+ *  --font-family-base   : Police principale (ex: 'Inter', sans-serif)
+ *  --font-size-xs/sm/md/lg/xl/2xl/3xl
+ *  --font-weight-regular/medium/semibold/bold
+ *  --line-height-tight/normal/relaxed
+ */
+
+/* Implémentation à venir */

@@ -1,0 +1,22 @@
+/**
+ * @file animations.css
+ * @layer Styles — Animations & Transitions
+ * @role  Keyframes et classes d'animation réutilisables dans toute l'application.
+ *        Centralise toutes les animations pour garantir la cohérence visuelle.
+ *
+ * @keyframes attendus
+ *  fadeIn         : Apparition progressive (opacity 0 → 1)
+ *  slideInUp      : Entrée depuis le bas (utilisé pour les toasts, modales)
+ *  slideInLeft    : Entrée depuis la gauche (panneau conversations du chat)
+ *  pulse          : Animation de chargement skeleton
+ *  spin           : Rotation 360° (spinner de chargement)
+ *
+ * @classes utilitaires
+ *  .animate-fade-in
+ *  .animate-slide-up
+ *  .animate-pulse
+ *  .transition-base   : transition: all 200ms ease-in-out
+ *  .transition-slow   : transition: all 350ms ease-in-out
+ */
+
+/* Implémentation à venir */
