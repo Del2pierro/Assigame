@@ -13,7 +13,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   LayoutDashboard,
   Users,
@@ -124,7 +124,14 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
+  const router  = useRouter();
+
+  /**
+   * isChecking : true pendant la vérification du rôle.
+   * Empêche l'affichage du contenu admin avant que la vérification soit terminée.
+   * Évite le "flash" (page qui s'affiche une fraction de seconde puis disparaît).
+   */
+  const [isChecking, setIsChecking] = useState(true);
 
   /**
    * Protection de la route : vérifie que l'utilisateur est connecté
@@ -138,7 +145,7 @@ export default function AdminLayout({
     // Si aucun profil en localStorage → non connecté → redirection login
     if (!profileRaw) {
       router.replace('/login');
-      return;
+      return; // on ne débloque pas l'affichage
     }
 
     try {
@@ -146,13 +153,29 @@ export default function AdminLayout({
       // Vérifie que le rôle est bien ADMIN
       if (profile?.typeUtilisateur?.libelle !== 'ADMIN') {
         router.replace('/dashboard'); // Un vendeur retourne à son tableau de bord
+        return; // on ne débloque pas l'affichage
       }
+      // ✅ Rôle ADMIN confirmé → on autorise l'affichage
+      setIsChecking(false);
     } catch {
       // JSON invalide → on efface et on redirige
       localStorage.removeItem('user_profile');
       router.replace('/login');
     }
   }, [router]);
+
+  // ── Écran de vérification : affiché pendant le contrôle du rôle ──────────
+  // Remplace le flash par un fond beige neutre, invisible pour l'utilisateur
+  if (isChecking) {
+    return (
+      <div
+        className="flex h-screen items-center justify-center"
+        style={{ backgroundColor: '#F8F5EE' }}
+      >
+        <p className="text-sm text-[#F2700B] animate-pulse">Vérification en cours…</p>
+      </div>
+    );
+  }
 
   return (
     // Conteneur plein écran : sidebar à gauche, contenu à droite
