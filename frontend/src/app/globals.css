@@ -13,8 +13,10 @@
  *   Noir texte       : #111111
  */
 
-/* ── Import Tailwind CSS v4 ─────────────────────────────────────────────── */
-@import "tailwindcss";
+/* ── Import Tailwind CSS v3 ─────────────────────────────────────────────── */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* ── Variables CSS globales ─────────────────────────────────────────────── */
 :root {
