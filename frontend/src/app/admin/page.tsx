@@ -97,37 +97,40 @@ export default function AdminDashboardPage() {
   
   // Données pour le Donut Utilisateurs
   const usersPieData = [
-    { name: 'Actifs', value: stats.utilisateursActifs || 1 }, // || 1 pour éviter un graph vide si 0
-    { name: 'Inactifs', value: stats.utilisateursInactifs || 1 },
+    { name: 'Actifs', value: stats.utilisateursActifs },
+    { name: 'Inactifs', value: stats.utilisateursInactifs },
   ];
   const USERS_COLORS = ['#82ca9d', '#111111'];
 
   // Données pour le Donut Produits
   const productsPieData = [
-    { name: 'Disponibles', value: stats.produitsDisponibles || 1 },
-    { name: 'Vendus', value: stats.produitsVendus || 1 },
+    { name: 'Disponibles', value: stats.produitsDisponibles },
+    { name: 'Vendus', value: stats.produitsVendus },
   ];
   const PRODUCTS_COLORS = ['#F2700B', '#111111'];
 
-  // Option A : Inscriptions par mois (Simulation des mois récents)
-  const inscriptionsData = [
-    { name: 'Jan', inscrits: 12 },
-    { name: 'Fév', inscrits: 19 },
-    { name: 'Mar', inscrits: 25 },
-    { name: 'Avr', inscrits: 32 },
-    { name: 'Mai', inscrits: 45 },
-    { name: 'Juin', inscrits: stats.totalUtilisateurs > 0 ? stats.totalUtilisateurs : 50 },
-  ];
+  // Option A : Inscriptions par mois (Calculées dynamiquement depuis les vrais utilisateurs)
+  const inscriptionsData = (() => {
+    const moisNoms = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+    const grouped = users.reduce((acc, user) => {
+      if (!user.dateInscription) return acc;
+      const date = new Date(user.dateInscription);
+      const moisIndex = date.getMonth(); // 0 à 11
+      acc[moisIndex] = (acc[moisIndex] || 0) + 1;
+      return acc;
+    }, {} as Record<number, number>);
 
-  // Option B : Produits par catégorie
-  const productsByCategoryData = categories.length > 0 ? categories.map(cat => ({
+    return Object.entries(grouped).map(([moisIndex, count]) => ({
+      name: moisNoms[Number(moisIndex)],
+      inscrits: count,
+    }));
+  })();
+
+  // Option B : Produits par catégorie (Calculés dynamiquement depuis les vraies catégories)
+  const productsByCategoryData = categories.map(cat => ({
     name: cat.nom,
-    produits: allProducts.filter(p => p.categorie.idCategorie === cat.idCategorie).length || Math.floor(Math.random() * 15) + 5
-  })) : [
-    { name: 'Vêtements', produits: 40 },
-    { name: 'Chaussures', produits: 25 },
-    { name: 'Accessoires', produits: 15 },
-  ];
+    produits: allProducts.filter(p => p.categorie.idCategorie === cat.idCategorie).length
+  }));
 
   return (
     <div className="space-y-8">
