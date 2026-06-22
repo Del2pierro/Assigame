@@ -100,7 +100,8 @@ export default function AdminDashboardPage() {
     { name: 'Actifs', value: stats.utilisateursActifs },
     { name: 'Inactifs', value: stats.utilisateursInactifs },
   ];
-  const USERS_COLORS = ['#82ca9d', '#111111'];
+  // Le vert du drapeau togolais (#006A4E) pour les comptes actifs, et Noir pour inactifs
+  const USERS_COLORS = ['#006A4E', '#111111'];
 
   // Données pour le Donut Produits
   const productsPieData = [
