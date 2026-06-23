@@ -11,6 +11,7 @@
 
 import { useEffect } from 'react';
 import { Users, Package, Tag, UserCheck, UserX, ShoppingBag } from 'lucide-react';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useAdminStore } from '@/features/admin/store';
 import { fetchAllUsers, fetchAllProductsAdmin, fetchAllCategories } from '@/features/admin/api';
 
@@ -92,6 +93,46 @@ export default function AdminDashboardPage() {
     totalCategories:      categories.length,
   };
 
+  // ─── Calcul des données pour les graphiques Recharts ─────────────────────
+  
+  // Données pour le Donut Utilisateurs
+  const usersPieData = [
+    { name: 'Actifs', value: stats.utilisateursActifs },
+    { name: 'Inactifs', value: stats.utilisateursInactifs },
+  ];
+  // Le vert du drapeau togolais (#006A4E) pour les comptes actifs, et Noir pour inactifs
+  const USERS_COLORS = ['#006A4E', '#111111'];
+
+  // Données pour le Donut Produits
+  const productsPieData = [
+    { name: 'Disponibles', value: stats.produitsDisponibles },
+    { name: 'Vendus', value: stats.produitsVendus },
+  ];
+  const PRODUCTS_COLORS = ['#F2700B', '#111111'];
+
+  // Option A : Inscriptions par mois (Calculées dynamiquement depuis les vrais utilisateurs)
+  const inscriptionsData = (() => {
+    const moisNoms = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+    const grouped = users.reduce((acc, user) => {
+      if (!user.dateInscription) return acc;
+      const date = new Date(user.dateInscription);
+      const moisIndex = date.getMonth(); // 0 à 11
+      acc[moisIndex] = (acc[moisIndex] || 0) + 1;
+      return acc;
+    }, {} as Record<number, number>);
+
+    return Object.entries(grouped).map(([moisIndex, count]) => ({
+      name: moisNoms[Number(moisIndex)],
+      inscrits: count,
+    }));
+  })();
+
+  // Option B : Produits par catégorie (Calculés dynamiquement depuis les vraies catégories)
+  const productsByCategoryData = categories.map(cat => ({
+    name: cat.nom,
+    produits: allProducts.filter(p => p.categorie.idCategorie === cat.idCategorie).length
+  }));
+
   return (
     <div className="space-y-8">
       {/* ── Titre de la page ── */}
@@ -140,6 +181,89 @@ export default function AdminDashboardPage() {
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <StatCard label="Catégories actives" value={stats.totalCategories} icon={<Tag size={22} />} />
+        </div>
+      </section>
+
+      {/* ── Graphiques Recharts ── */}
+      <section className="mt-12 pt-8 border-t border-[#d9cdb8]">
+        <h3 className="text-xl font-black text-[#111111] mb-6">Analyses Détaillées</h3>
+        
+        {/* Ligne 1 : Les Donuts */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          
+          {/* Donut Utilisateurs */}
+          <div className="bg-[#EDE8DC] p-6 rounded-xl border border-[#d9cdb8] shadow-sm">
+            <h4 className="text-center font-bold text-[#111111] mb-4">Répartition des Utilisateurs</h4>
+            <div className="h-[250px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={usersPieData} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                    {usersPieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={USERS_COLORS[index % USERS_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Donut Produits */}
+          <div className="bg-[#EDE8DC] p-6 rounded-xl border border-[#d9cdb8] shadow-sm">
+            <h4 className="text-center font-bold text-[#111111] mb-4">État des Produits</h4>
+            <div className="h-[250px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={productsPieData} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                    {productsPieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={PRODUCTS_COLORS[index % PRODUCTS_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Ligne 2 : Les Bar Charts (Option A et Option B) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          {/* Graphique Croissance */}
+          <div className="bg-[#F8F5EE] p-6 rounded-xl border border-[#d9cdb8] shadow-sm">
+            <h4 className="text-center font-bold text-[#111111] mb-6">Croissance des Inscriptions</h4>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={inscriptionsData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#D9CDB8" vertical={false} />
+                  <XAxis dataKey="name" tick={{fill: '#666666'}} axisLine={false} tickLine={false} />
+                  <YAxis tick={{fill: '#666666'}} axisLine={false} tickLine={false} />
+                  <RechartsTooltip cursor={{fill: '#F0E9D9'}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'}} />
+                  <Bar dataKey="inscrits" fill="#F2700B" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Graphique Catégories */}
+          <div className="bg-[#F8F5EE] p-6 rounded-xl border border-[#d9cdb8] shadow-sm">
+            <h4 className="text-center font-bold text-[#111111] mb-6">Produits par Catégorie</h4>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={productsByCategoryData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#D9CDB8" vertical={false} />
+                  <XAxis dataKey="name" tick={{fill: '#666666'}} axisLine={false} tickLine={false} />
+                  <YAxis tick={{fill: '#666666'}} axisLine={false} tickLine={false} />
+                  <RechartsTooltip cursor={{fill: '#F0E9D9'}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'}} />
+                  <Bar dataKey="produits" fill="#111111" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
         </div>
       </section>
     </div>
