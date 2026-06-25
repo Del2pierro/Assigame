@@ -9,12 +9,14 @@ import com.esgis2026.assigame.services.ConversationService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/conversations")
+@Transactional
 public class ConversationController {
 
     private final ConversationService conversationService;
