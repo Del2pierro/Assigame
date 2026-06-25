@@ -233,7 +233,7 @@ export const SellerChatPanel: React.FC = () => {
             {/* Input */}
             <div className="border-t border-[#d9cdb8]">
               <ChatInput
-                onSendMessage={sendMessage}
+                onSendMessage={(content) => sendMessage(content, "SELLER")}
                 disabled={wsStatus !== 'CONNECTED' || !activeConversationId}
               />
             </div>

@@ -18,6 +18,9 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, currentUserId
             : 'bg-white text-gray-800 border border-gray-100 rounded-tl-none'
         }`}
       >
+        <div className={`text-[10px] font-bold mb-1 opacity-80 ${isMine ? 'text-orange-100' : 'text-gray-500'}`}>
+          {message.senderType === 'SELLER' ? 'Vendeur' : 'Acheteur'}
+        </div>
         <p className="whitespace-pre-wrap">{message.contenu}</p>
         <span
           className={`text-[10px] mt-1 block text-right ${

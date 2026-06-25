@@ -106,7 +106,7 @@ export const ChatSidebar: React.FC = () => {
         {/* Input */}
         <div className="bg-white/50 p-2 backdrop-blur-md">
           <ChatInput
-            onSendMessage={sendMessage}
+            onSendMessage={(content) => sendMessage(content, "BUYER")}
             disabled={wsStatus !== "CONNECTED" || !activeConversationId}
           />
         </div>
