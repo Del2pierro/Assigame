@@ -1,22 +1,13 @@
-/**
- * @file store.ts
- * @feature products
- * @role  Store Zustand de la feature products.
- *        Maintient l'état du catalogue en mémoire pour éviter les rechargements inutiles.
- *
- * @state
- *  - products      : Product[] — liste des produits chargés
- *  - selectedProduct: Product | null — produit en cours de consultation
- *  - filters       : ProductFilters — filtres actifs (recherche, catégorie, tri)
- *  - isLoading     : boolean
- *  - error         : string | null
- *
- * @actions
- *  - setProducts()
- *  - setSelectedProduct()
- *  - setFilters()
- *  - removeProduct()       — suppression optimiste après DELETE
- *  - updateProductInList() — mise à jour optimiste du statut
- */
+import { create } from 'zustand';
+import { ProductState } from './types';
+import { Produit } from '@/types/models.types';
 
-// Implémentation à venir (Zustand)
+export const useProductStore = create<ProductState>((set) => ({
+  products: [],
+  isLoading: false,
+  error: null,
+
+  setProducts: (products: Produit[]) => set({ products }),
+  setLoading: (isLoading: boolean) => set({ isLoading }),
+  setError: (error: string | null) => set({ error }),
+}));

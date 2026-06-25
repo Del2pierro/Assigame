@@ -1,15 +1,11 @@
-/**
- * @file types.ts
- * @feature products
- * @role  Types TypeScript du domaine produits.
- *
- * @exports
- *  - Product              : Entité produit complète (importée depuis types/models.types.ts)
- *  - ProductStatus        : Enum { DISPONIBLE = 'DISPONIBLE', RESERVE = 'RESERVE', VENDU = 'VENDU' }
- *  - ProductFormPayload   : { nom, description, prix, imageBase64, idCategorie }
- *  - ProductUpdatePayload : Partial<ProductFormPayload>
- *  - ProductFilters       : { search?: string; idCategorie?: number; sortBy?: SortField; sortDir?: SortDirection }
- *  - ProductListState     : { products: Product[]; filters: ProductFilters; isLoading: boolean }
- */
+import { Produit } from '@/types/models.types';
 
-// Implémentation à venir
+export interface ProductState {
+  products: Produit[];
+  isLoading: boolean;
+  error: string | null;
+
+  setProducts: (products: Produit[]) => void;
+  setLoading: (isLoading: boolean) => void;
+  setError: (error: string | null) => void;
+}

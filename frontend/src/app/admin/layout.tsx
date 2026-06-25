@@ -14,6 +14,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useAuthStore } from '@/store/auth.store';
 import {
   LayoutDashboard,
   Users,
@@ -35,10 +36,9 @@ function AdminSidebar() {
   const pathname = usePathname();
   const router   = useRouter();
 
-  /** Déconnexion : efface le localStorage et redirige vers /login */
+  /** Déconnexion : efface le store et le localStorage et redirige vers /login */
   const handleLogout = () => {
-    localStorage.removeItem('user_id');
-    localStorage.removeItem('user_profile');
+    useAuthStore.getState().clearUser();
     router.push('/login');
   };
 
@@ -150,16 +150,28 @@ export default function AdminLayout({
 
     try {
       const profile = JSON.parse(profileRaw);
-      // Vérifie que le rôle est bien ADMIN
-      if (profile?.typeUtilisateur?.libelle !== 'ADMIN') {
-        router.replace('/dashboard'); // Un vendeur retourne à son tableau de bord
-        return; // on ne débloque pas l'affichage
+      const role = profile?.typeUtilisateur?.libelle;
+
+      // Vérifie que le rôle est bien ADMIN sans créer de boucle avec l'espace vendeur.
+      if (role === 'VENDEUR') {
+        router.replace('/dashboard');
+        return;
       }
-      // ✅ Rôle ADMIN confirmé → on autorise l'affichage
+
+      if (role !== 'ADMIN') {
+        localStorage.removeItem('user_profile');
+        localStorage.removeItem('user_id');
+        router.replace('/login');
+        return;
+      }
+
+      // ✅ Rôle ADMIN confirmé → synchroniser Zustand et autoriser l'affichage
+      useAuthStore.getState().setUser(profile);
       setIsChecking(false);
     } catch {
       // JSON invalide → on efface et on redirige
       localStorage.removeItem('user_profile');
+      localStorage.removeItem('user_id');
       router.replace('/login');
     }
   }, [router]);

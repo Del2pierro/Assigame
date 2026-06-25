@@ -1,14 +1,28 @@
-/**
- * @file hooks.ts
- * @feature categories
- * @role  Hook React des catégories avec mise en cache.
- *
- * @hooks
- *  useCategories()
- *    - Charge les catégories au premier appel uniquement (si !isLoaded)
- *    - Utilise fetchCategories() puis stocke dans le store
- *    - Synchronise activeCategory avec les filtres de features/products/store.ts
- *    - Expose : { categories, activeCategory, setActiveCategory, isLoading }
- */
+import { useCallback } from 'react';
+import { useCategoryStore } from './store';
+import { categoryApi } from './api';
 
-// Implémentation à venir
+export const useCategories = () => {
+  const store = useCategoryStore();
+
+  const loadCategories = useCallback(async () => {
+    // Accès via getState() pour éviter la dépendance instable sur store
+    const { setLoading, setError, setCategories } = useCategoryStore.getState();
+    setLoading(true);
+    setError(null);
+    try {
+      const categories = await categoryApi.fetchCategories();
+      setCategories(categories);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erreur lors du chargement des catégories';
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  }, []); // ← plus de dépendance sur store
+
+  return {
+    ...store,
+    loadCategories
+  };
+};

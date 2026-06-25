@@ -1,11 +1,13 @@
-/**
- * @file types.ts
- * @feature categories
- * @role  Type unique de la feature catégories.
- *
- * @exports
- *  - Categorie : { idCategorie: number; nom: string }
- *                (identique au modèle backend)
- */
+import { Categorie } from '@/types/models.types';
 
-// Implémentation à venir
+export interface CategoryState {
+  categories: Categorie[];
+  activeCategoryId: number | null;
+  isLoading: boolean;
+  error: string | null;
+
+  setCategories: (categories: Categorie[]) => void;
+  setActiveCategory: (id: number | null) => void;
+  setLoading: (isLoading: boolean) => void;
+  setError: (error: string | null) => void;
+}

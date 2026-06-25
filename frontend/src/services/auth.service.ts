@@ -1,16 +1,32 @@
-/**
- * @file auth.service.ts
- * @layer Service — Domaine Auth
- * @role  Couche HTTP pour toutes les opérations d'authentification.
- *        Utilise l'instance api depuis api.client.ts.
- *
- * @endpoints
- *  - login()    → POST /api/auth/login
- *  - register() → POST /api/utilisateurs/register/{idTypeUtilisateur}
- *
- * ⚠️ Ce fichier ne doit contenir AUCUN état (pas de useState, pas de store).
- *    Il retourne uniquement les données brutes de l'API.
- *    La mise à jour des stores est de la responsabilité des hooks (features/auth/hooks.ts).
- */
+import api from './api.client';
+import { LoginPayload, RegisterPayload, AuthResponse } from '@/features/auth/types';
 
-// Implémentation à venir
+export const authService = {
+  /**
+   * Effectue la connexion d'un utilisateur.
+   * En cas de succès, retourne les informations du profil utilisateur connecté.
+   */
+  async login(payload: LoginPayload): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>('/auth/login', {
+      login: payload.login,
+      password: payload.motDePasse,
+    });
+    return response.data;
+  },
+
+  /**
+   * Enregistre un nouvel utilisateur.
+   * idTypeUtilisateur: 2 par défaut (VENDEUR).
+   */
+  async register(payload: RegisterPayload, idTypeUtilisateur: number = 2): Promise<void> {
+    await api.post(`/utilisateurs/register/${idTypeUtilisateur}`, {
+      nom: payload.nom,
+      prenom: payload.prenom,
+      email: payload.email,
+      login: payload.login,
+      motDePasse: payload.motDePasse,
+      telephone: payload.telephone || undefined,
+      adresse: payload.adresse || undefined,
+    });
+  },
+};

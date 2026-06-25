@@ -1,30 +1,30 @@
-/**
- * @file hooks.ts
- * @feature products
- * @role  Hooks React de la feature products. Interface consommée par les composants.
- *
- * @hooks
- *  useProducts()
- *    - Charge tous les produits au montage (fetchAllProducts)
- *    - Gère les filtres (catégorie, recherche, tri) et met à jour le store
- *    - Expose : { products, isLoading, error, setFilter }
- *
- *  useProductDetail(id)
- *    - Charge un produit par son ID (fetchProductById)
- *    - Gère le cas produit non trouvé → navigation vers 404
- *    - Expose : { product, isLoading, error }
- *
- *  useProductForm(id?)
- *    - En mode création : formulaire vide
- *    - En mode édition : pré-charge les données du produit (fetchProductById)
- *    - Valide via productSchema, soumet via createProduct ou updateProduct
- *    - Gère la conversion image → Base64 via utils.toBase64()
- *    - Expose : { form, onSubmit, isSubmitting, previewUrl }
- *
- *  useProductMutations()
- *    - Regroupe deleteProduct et updateProductStatus
- *    - Met à jour le store de façon optimiste
- *    - Expose : { deleteProduct, updateStatus, isLoading }
- */
+import { useCallback } from 'react';
+import { useProductStore } from './store';
+import { productApi } from './api';
 
-// Implémentation à venir
+export const useProducts = () => {
+  const store = useProductStore();
+
+  const loadProducts = useCallback(async (categoryId: number | null = null) => {
+    // Accès via getState() pour éviter la dépendance instable sur store
+    const { setLoading, setError, setProducts } = useProductStore.getState();
+    setLoading(true);
+    setError(null);
+    try {
+      const products = categoryId 
+        ? await productApi.fetchProductsByCategory(categoryId)
+        : await productApi.fetchAllProducts();
+      setProducts(products);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erreur lors du chargement des produits';
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  }, []); // ← plus de dépendance sur store
+
+  return {
+    ...store,
+    loadProducts
+  };
+};

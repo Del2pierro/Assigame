@@ -1,16 +1,16 @@
-/**
- * @file api.ts
- * @feature auth
- * @role  Pont entre la feature auth et la couche service.
- *        Expose des fonctions typées qui délèguent à auth.service.ts.
- *        Isole la feature des détails d'implémentation HTTP.
- *
- * @functions
- *  - loginUser(payload: LoginPayload)           → AuthResponse
- *  - registerUser(payload: RegisterPayload)     → void
- *
- * ⚠️ Toutes les fonctions retournent des Promises.
- *    La gestion des erreurs est centralisée dans les hooks.
- */
+import { authService } from '@/services/auth.service';
+import { LoginPayload, RegisterPayload, AuthResponse } from './types';
 
-// Implémentation à venir
+/**
+ * Connecteur API pour la connexion d'un vendeur.
+ */
+export async function loginUser(payload: LoginPayload): Promise<AuthResponse> {
+  return authService.login(payload);
+}
+
+/**
+ * Connecteur API pour l'inscription d'un vendeur (idTypeUtilisateur = 2).
+ */
+export async function registerUser(payload: RegisterPayload): Promise<void> {
+  return authService.register(payload, 2);
+}

@@ -28,13 +28,13 @@ import { ProductStatus } from '@/types/models.types';
 function StatusBadge({ statut }: { statut: ProductStatus }) {
   const styles: Record<ProductStatus, { bg: string; color: string }> = {
     DISPONIBLE: { bg: '#d1fae5', color: '#065f46' },
-    RESERVE:    { bg: '#FFF3E0', color: '#F2700B' },
-    VENDU:      { bg: '#f3f4f6', color: '#6b7280' },
+    RESERVE: { bg: '#FFF3E0', color: '#F2700B' },
+    VENDU: { bg: '#f3f4f6', color: '#6b7280' },
   };
   const labels: Record<ProductStatus, string> = {
     DISPONIBLE: 'Disponible',
-    RESERVE:    'Réservé',
-    VENDU:      'Vendu',
+    RESERVE: 'Réservé',
+    VENDU: 'Vendu',
   };
   return (
     <span
@@ -56,8 +56,8 @@ export default function AdminProductsPage() {
   } = useAdminStore();
 
   // Filtres locaux
-  const [search,          setSearch]          = useState('');
-  const [filterStatut,    setFilterStatut]    = useState<ProductStatus | ''>('');
+  const [search, setSearch] = useState('');
+  const [filterStatut, setFilterStatut] = useState<ProductStatus | ''>('');
   const [filterCategorie, setFilterCategorie] = useState<number | ''>('');
 
   /** Chargement initial des produits et catégories */
@@ -104,9 +104,9 @@ export default function AdminProductsPage() {
 
   // ─── Filtrage côté client ─────────────────────────────────────────────────
   const filtered = allProducts.filter((p) => {
-    const matchSearch     = search === '' || p.nom.toLowerCase().includes(search.toLowerCase());
-    const matchStatut     = filterStatut === '' || p.statut === filterStatut;
-    const matchCategorie  = filterCategorie === '' || p.categorie.idCategorie === filterCategorie;
+    const matchSearch = search === '' || p.nom.toLowerCase().includes(search.toLowerCase());
+    const matchStatut = filterStatut === '' || p.statut === filterStatut;
+    const matchCategorie = filterCategorie === '' || p.categorie.idCategorie === filterCategorie;
     return matchSearch && matchStatut && matchCategorie;
   });
 
@@ -205,8 +205,8 @@ export default function AdminProductsPage() {
 
               {/* Catégorie + vendeur */}
               <div className="flex flex-col gap-0.5 text-xs text-[#666] mb-3">
-                <span>📦 {produit.categorie.nom}</span>
-                <span>👤 {produit.utilisateur.prenom} {produit.utilisateur.nom}</span>
+                <span>📦 {produit.categorie?.nom}</span>
+                <span>👤 {produit.utilisateur?.prenom} {produit.utilisateur?.nom}</span>
                 <span>📅 {new Date(produit.datePublication).toLocaleDateString('fr-FR')}</span>
               </div>
 
