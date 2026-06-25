@@ -25,9 +25,5 @@ export default function LoginPage() {
 
   if (isAuthenticated) return null;
 
-  return (
-    <main className="min-h-screen bg-[#F8F5EE] flex items-center justify-center p-4">
-      <LoginForm />
-    </main>
-  );
+  return <LoginForm />;
 }

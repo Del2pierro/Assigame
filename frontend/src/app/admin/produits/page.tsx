@@ -2,39 +2,45 @@
  * @file page.tsx
  * @route  /admin/produits
  * @role   Page de modération de tous les produits de la plateforme.
- *         Vue catalogue (grille) style Vinted. L'admin peut supprimer tout article.
+ *         L'admin peut voir et supprimer n'importe quel article.
+ *         Assemble : ProductModerationTable.
  *
  * @features
- *  - Liste de TOUS les produits : GET /api/produits
- *  - Filtres : statut (DISPONIBLE / RESERVE / VENDU) + catégorie
- *  - Suppression admin : DELETE /api/produits/{id}
+ *  - Liste de TOUS les produits (tous vendeurs confondus) : GET /api/produits
+ *  - Affichage : image, nom, prix, statut, vendeur (nom + email)
+ *  - Suppression admin d'un article : DELETE /api/produits/{id}
+ *  - Filtre par statut (DISPONIBLE / RESERVE / VENDU)
+ *  - Filtre par catégorie
+ *  - Clic sur un produit → ouvre /produits/{id} dans un nouvel onglet
  *
  * Route PROTÉGÉE — Rôle ADMIN requis.
  */
 
-'use client';
+export const metadata = {
+  title: "Modération des produits — Admin Assigame",
+};
 
-import { useEffect, useState } from 'react';
-import { Trash2, Search, ExternalLink } from 'lucide-react';
-import { useAdminStore } from '@/features/admin/store';
+import { useEffect, useState } from "react";
+import { Trash2, Search, ExternalLink } from "lucide-react";
+import { useAdminStore } from "@/features/admin/store";
 import {
   fetchAllProductsAdmin,
   fetchAllCategories,
   deleteProductAdmin,
-} from '@/features/admin/api';
-import { ProductStatus } from '@/types/models.types';
+} from "@/features/admin/api";
+import { ProductStatus } from "@/types/models.types";
 
 // ─── Badge de statut coloré ──────────────────────────────────────────────────
 function StatusBadge({ statut }: { statut: ProductStatus }) {
   const styles: Record<ProductStatus, { bg: string; color: string }> = {
-    DISPONIBLE: { bg: '#d1fae5', color: '#065f46' },
-    RESERVE: { bg: '#FFF3E0', color: '#F2700B' },
-    VENDU: { bg: '#f3f4f6', color: '#6b7280' },
+    DISPONIBLE: { bg: "#d1fae5", color: "#065f46" },
+    RESERVE: { bg: "#FFF3E0", color: "#F2700B" },
+    VENDU: { bg: "#f3f4f6", color: "#6b7280" },
   };
   const labels: Record<ProductStatus, string> = {
-    DISPONIBLE: 'Disponible',
-    RESERVE: 'Réservé',
-    VENDU: 'Vendu',
+    DISPONIBLE: "Disponible",
+    RESERVE: "Réservé",
+    VENDU: "Vendu",
   };
   return (
     <span
@@ -49,16 +55,22 @@ function StatusBadge({ statut }: { statut: ProductStatus }) {
 // ─── Page principale ─────────────────────────────────────────────────────────
 export default function AdminProductsPage() {
   const {
-    allProducts, categories, isLoading,
-    setAllProducts, setCategories, setIsLoading,
+    allProducts,
+    categories,
+    isLoading,
+    setAllProducts,
+    setCategories,
+    setIsLoading,
     removeProductFromList,
-    confirmDialog, openConfirmDialog, closeConfirmDialog,
+    confirmDialog,
+    openConfirmDialog,
+    closeConfirmDialog,
   } = useAdminStore();
 
   // Filtres locaux
-  const [search, setSearch] = useState('');
-  const [filterStatut, setFilterStatut] = useState<ProductStatus | ''>('');
-  const [filterCategorie, setFilterCategorie] = useState<number | ''>('');
+  const [search, setSearch] = useState("");
+  const [filterStatut, setFilterStatut] = useState<ProductStatus | "">("");
+  const [filterCategorie, setFilterCategorie] = useState<number | "">("");
 
   /** Chargement initial des produits et catégories */
   useEffect(() => {
@@ -72,7 +84,7 @@ export default function AdminProductsPage() {
         setAllProducts(produitsData);
         setCategories(catsData);
       } catch (err) {
-        console.error('Erreur chargement produits admin :', err);
+        console.error("Erreur chargement produits admin :", err);
       } finally {
         setIsLoading(false);
       }
@@ -84,8 +96,9 @@ export default function AdminProductsPage() {
   const handleDeleteRequest = (id: number) => {
     openConfirmDialog({
       targetId: id,
-      action: 'deleteProduct',
-      message: 'Voulez-vous vraiment supprimer cette annonce ? Cette action est irréversible.',
+      action: "deleteProduct",
+      message:
+        "Voulez-vous vraiment supprimer cette annonce ? Cette action est irréversible.",
     });
   };
 
@@ -96,7 +109,7 @@ export default function AdminProductsPage() {
       await deleteProductAdmin(confirmDialog.targetId);
       removeProductFromList(confirmDialog.targetId); // Mise à jour optimiste
     } catch (err) {
-      console.error('Erreur suppression produit :', err);
+      console.error("Erreur suppression produit :", err);
     } finally {
       closeConfirmDialog();
     }
@@ -104,9 +117,11 @@ export default function AdminProductsPage() {
 
   // ─── Filtrage côté client ─────────────────────────────────────────────────
   const filtered = allProducts.filter((p) => {
-    const matchSearch = search === '' || p.nom.toLowerCase().includes(search.toLowerCase());
-    const matchStatut = filterStatut === '' || p.statut === filterStatut;
-    const matchCategorie = filterCategorie === '' || p.categorie.idCategorie === filterCategorie;
+    const matchSearch =
+      search === "" || p.nom.toLowerCase().includes(search.toLowerCase());
+    const matchStatut = filterStatut === "" || p.statut === filterStatut;
+    const matchCategorie =
+      filterCategorie === "" || p.categorie.idCategorie === filterCategorie;
     return matchSearch && matchStatut && matchCategorie;
   });
 
@@ -114,7 +129,9 @@ export default function AdminProductsPage() {
     <div className="space-y-6">
       {/* ── En-tête ── */}
       <div>
-        <h2 className="text-2xl font-black text-[#111111]">Catalogue des produits</h2>
+        <h2 className="text-2xl font-black text-[#111111]">
+          Catalogue des produits
+        </h2>
         <p className="text-sm text-[#666666] mt-1">
           {allProducts.length} article(s) en ligne sur la plateforme
         </p>
@@ -137,7 +154,9 @@ export default function AdminProductsPage() {
         {/* Filtre par statut */}
         <select
           value={filterStatut}
-          onChange={(e) => setFilterStatut(e.target.value as ProductStatus | '')}
+          onChange={(e) =>
+            setFilterStatut(e.target.value as ProductStatus | "")
+          }
           className="px-3 py-2 rounded-lg text-sm border border-[#d9cdb8] bg-[#EDE8DC] text-[#444444] outline-none"
         >
           <option value="">Tous les statuts</option>
@@ -149,19 +168,27 @@ export default function AdminProductsPage() {
         {/* Filtre par catégorie */}
         <select
           value={filterCategorie}
-          onChange={(e) => setFilterCategorie(e.target.value === '' ? '' : Number(e.target.value))}
+          onChange={(e) =>
+            setFilterCategorie(
+              e.target.value === "" ? "" : Number(e.target.value),
+            )
+          }
           className="px-3 py-2 rounded-lg text-sm border border-[#d9cdb8] bg-[#EDE8DC] text-[#444444] outline-none"
         >
           <option value="">Toutes les catégories</option>
           {categories.map((c) => (
-            <option key={c.idCategorie} value={c.idCategorie}>{c.nom}</option>
+            <option key={c.idCategorie} value={c.idCategorie}>
+              {c.nom}
+            </option>
           ))}
         </select>
       </div>
 
       {/* ── Indicateur de chargement ── */}
       {isLoading && (
-        <p className="text-sm text-[#F2700B] animate-pulse">Chargement des articles…</p>
+        <p className="text-sm text-[#F2700B] animate-pulse">
+          Chargement des articles…
+        </p>
       )}
 
       {/* ── Grille catalogue (style Vinted) ── */}
@@ -170,7 +197,7 @@ export default function AdminProductsPage() {
           <div
             key={produit.idProduit}
             className="rounded-xl border border-[#d9cdb8] overflow-hidden shadow-sm flex flex-col group transition-shadow hover:shadow-md"
-            style={{ backgroundColor: '#F0E9D9' }}
+            style={{ backgroundColor: "#F0E9D9" }}
           >
             {/* Image du produit */}
             <div className="relative aspect-square bg-[#EDE8DC] overflow-hidden">
@@ -200,14 +227,21 @@ export default function AdminProductsPage() {
                 {produit.nom}
               </h3>
               <p className="text-lg font-black text-[#F2700B] mb-2">
-                {produit.prix.toFixed(2).replace('.', ',')} €
+                {produit.prix.toFixed(2).replace(".", ",")} €
               </p>
 
               {/* Catégorie + vendeur */}
               <div className="flex flex-col gap-0.5 text-xs text-[#666] mb-3">
                 <span>📦 {produit.categorie?.nom}</span>
-                <span>👤 {produit.utilisateur?.prenom} {produit.utilisateur?.nom}</span>
-                <span>📅 {new Date(produit.datePublication).toLocaleDateString('fr-FR')}</span>
+                <span>
+                  👤 {produit.utilisateur?.prenom} {produit.utilisateur?.nom}
+                </span>
+                <span>
+                  📅{" "}
+                  {new Date(produit.datePublication).toLocaleDateString(
+                    "fr-FR",
+                  )}
+                </span>
               </div>
 
               {/* Actions admin */}
@@ -250,10 +284,14 @@ export default function AdminProductsPage() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div
             className="rounded-2xl p-6 shadow-xl max-w-sm w-full mx-4 border border-[#d9cdb8]"
-            style={{ backgroundColor: '#F8F5EE' }}
+            style={{ backgroundColor: "#F8F5EE" }}
           >
-            <h3 className="text-base font-bold text-[#111111] mb-3">Confirmer le retrait</h3>
-            <p className="text-sm text-[#444444] mb-6">{confirmDialog.message}</p>
+            <h3 className="text-base font-bold text-[#111111] mb-3">
+              Confirmer le retrait
+            </h3>
+            <p className="text-sm text-[#444444] mb-6">
+              {confirmDialog.message}
+            </p>
             <div className="flex gap-3 justify-end">
               <button
                 onClick={closeConfirmDialog}
