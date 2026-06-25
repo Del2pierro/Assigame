@@ -38,6 +38,11 @@
 
 import api from '@/services/api.client';
 import { Utilisateur, Produit, Categorie } from '@/types/models.types';
+import {
+  BackendCategorie,
+  mapBackendCategorie,
+  toBackendCategoryRequest,
+} from '@/lib/category.mapper';
 import { CategoryPayload, UserToggleResult } from './types';
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -128,8 +133,8 @@ export const deleteUser = async (id: number): Promise<void> => {
  * @returns {Promise<Categorie[]>} Liste de toutes les catégories
  */
 export const fetchAllCategories = async (): Promise<Categorie[]> => {
-  const { data } = await api.get<Categorie[]>('/categories');
-  return data;
+  const { data } = await api.get<BackendCategorie[]>('/categories');
+  return data.map(mapBackendCategorie);
 };
 
 /**
@@ -139,8 +144,11 @@ export const fetchAllCategories = async (): Promise<Categorie[]> => {
  * @returns {Promise<Categorie>} La catégorie créée avec son ID généré par le backend
  */
 export const createCategory = async (payload: CategoryPayload): Promise<Categorie> => {
-  const { data } = await api.post<Categorie>('/categories', payload);
-  return data;
+  const { data } = await api.post<BackendCategorie>(
+    '/categories',
+    toBackendCategoryRequest(payload.nom)
+  );
+  return mapBackendCategorie(data);
 };
 
 /**
@@ -151,8 +159,11 @@ export const createCategory = async (payload: CategoryPayload): Promise<Categori
  * @returns {Promise<Categorie>} La catégorie mise à jour
  */
 export const updateCategory = async (id: number, payload: CategoryPayload): Promise<Categorie> => {
-  const { data } = await api.put<Categorie>(`/categories/${id}`, payload);
-  return data;
+  const { data } = await api.put<BackendCategorie>(
+    `/categories/${id}`,
+    toBackendCategoryRequest(payload.nom)
+  );
+  return mapBackendCategorie(data);
 };
 
 /**

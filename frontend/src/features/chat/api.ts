@@ -1,18 +1,18 @@
-/**
- * @file api.ts
- * @feature chat
- * @role  Pont entre la feature chat et chat.service.ts (REST uniquement).
- *        La communication WebSocket temps réel est gérée dans hooks.ts via stomp.client.ts.
- *
- * @functions
- *  - initiateConversation(payload: CreateConversationPayload) → Conversation
- *    Crée ou récupère une conversation existante pour un produit donné.
- *
- *  - loadSellerConversations(sellerId)    → Conversation[]
- *    Charge toutes les conversations d'un vendeur connecté.
- *
- *  - loadMessageHistory(conversationId, page?, size?) → PaginatedResponse<Message>
- *    Charge l'historique paginé des messages d'une conversation.
- */
+import { chatService } from '@/services/chat.service';
+import { CreateConversationPayload } from './types';
+import { Conversation, Message } from '@/types/models.types';
+import { PaginatedResponse } from '@/types/api.types';
 
-// Implémentation à venir
+export const chatApi = {
+  initiateConversation: async (payload: CreateConversationPayload): Promise<Conversation> => {
+    return chatService.createConversation(payload);
+  },
+
+  loadSellerConversations: async (sellerId: number): Promise<Conversation[]> => {
+    return chatService.getSellerConversations(sellerId);
+  },
+
+  loadMessageHistory: async (conversationId: number, page?: number, size?: number): Promise<PaginatedResponse<Message>> => {
+    return chatService.getMessages(conversationId, page, size);
+  }
+};

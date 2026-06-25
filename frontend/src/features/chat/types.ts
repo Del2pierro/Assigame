@@ -1,17 +1,34 @@
-/**
- * @file types.ts
- * @feature chat
- * @role  Types TypeScript du domaine messagerie.
- *
- * @exports
- *  - Conversation         : Entité conversation (importée depuis types/models.types.ts)
- *  - Message              : Entité message (importée depuis types/models.types.ts)
- *  - SenderType           : Enum { BUYER = 'BUYER', SELLER = 'SELLER' }
- *  - StompSendPayload     : { conversationId, senderId, senderType, contenu }
- *                           Payload envoyé via STOMP vers /app/chat.send
- *  - CreateConversationPayload : { buyerId, sellerId, productId }
- *  - ChatState            : { activeConversationId, messages, conversations, wsStatus }
- *  - WsStatus             : 'DISCONNECTED' | 'CONNECTING' | 'CONNECTED' | 'ERROR'
- */
+import { Conversation, Message, SenderType } from '@/types/models.types';
 
-// Implémentation à venir
+export type WsStatus = 'DISCONNECTED' | 'CONNECTING' | 'CONNECTED' | 'ERROR';
+
+export interface StompSendPayload {
+  conversationId: number;
+  senderId: string;
+  senderType: SenderType;
+  content: string;
+}
+
+export interface CreateConversationPayload {
+  buyerId: string;
+  sellerId: number;
+  productId: number;
+}
+
+export interface ChatState {
+  isSidebarOpen: boolean;
+  activeConversationId: number | null;
+  conversations: Conversation[];
+  messages: Record<number, Message[]>;
+  wsStatus: WsStatus;
+  
+  // Actions
+  setSidebarOpen: (isOpen: boolean) => void;
+  setActiveConversation: (id: number | null) => void;
+  setConversations: (conversations: Conversation[]) => void;
+  addConversation: (conversation: Conversation) => void;
+  setMessages: (conversationId: number, messages: Message[]) => void;
+  appendMessage: (message: Message) => void;
+  setWsStatus: (status: WsStatus) => void;
+  clearChat: () => void;
+}

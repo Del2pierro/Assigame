@@ -1,14 +1,20 @@
-/**
- * @file api.types.ts
- * @layer Types — Contrats API
- * @role  Types génériques représentant la structure des requêtes et réponses API.
- *        Garantit que toute la couche service respecte un contrat uniforme.
- *
- * @exports
- *  - ApiResponse<T>      : Wrapper générique { data: T, message?: string }
- *  - ApiError            : { status: number, message: string, errors?: Record<string, string> }
- *  - PaginatedResponse<T>: { content: T[], totalElements: number, totalPages: number, page: number }
- *  - RequestStatus       : Enum { IDLE, LOADING, SUCCESS, ERROR }
- */
+export interface ApiResponse<T> {
+  data: T;
+  message?: string;
+}
 
-// Implémentation à venir
+export interface ApiError {
+  status: number;
+  message: string;
+  errors?: Record<string, string>;
+}
+
+export interface PaginatedResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number; // page en spring boot
+  size: number;
+}
+
+export type RequestStatus = 'IDLE' | 'LOADING' | 'SUCCESS' | 'ERROR';

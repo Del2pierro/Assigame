@@ -1,19 +1,13 @@
-/**
- * @file store.ts
- * @feature auth
- * @role  État local de la feature auth (formulaires uniquement).
- *        NE PAS confondre avec store/auth.store.ts qui gère la SESSION globale.
- *        Ce store gère l'état transitoire des formulaires login/register.
- *
- * @state
- *  - isSubmitting   : boolean — formulaire en cours de soumission
- *  - formError      : string | null — message d'erreur du formulaire
- *  - successMessage : string | null — message de succès post-inscription
- *
- * @actions
- *  - setSubmitting()
- *  - setFormError()
- *  - clearFormState()
- */
+import { create } from 'zustand';
+import { AuthFormState } from './types';
 
-// Implémentation à venir (Zustand)
+export const useAuthFormStore = create<AuthFormState>((set) => ({
+  isSubmitting: false,
+  formError: null,
+  successMessage: null,
+
+  setSubmitting: (isSubmitting) => set({ isSubmitting }),
+  setFormError: (formError) => set({ formError }),
+  setSuccessMessage: (successMessage) => set({ successMessage }),
+  clearFormState: () => set({ isSubmitting: false, formError: null, successMessage: null }),
+}));

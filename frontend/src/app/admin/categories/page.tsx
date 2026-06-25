@@ -33,11 +33,11 @@ export default function AdminCategoriesPage() {
   } = useAdminStore();
 
   // État du formulaire de création
-  const [newName, setNewName]       = useState('');
+  const [newName, setNewName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
   // État d'édition inline : stocke l'ID de la catégorie en cours d'édition
-  const [editId, setEditId]     = useState<number | null>(null);
+  const [editId, setEditId] = useState<number | null>(null);
   const [editName, setEditName] = useState('');
 
   /** Chargement initial de la liste des catégories */

@@ -1,19 +1,49 @@
-/**
- * @file hooks.ts
- * @feature profile
- * @role  Hooks React du profil vendeur.
- *
- * @hooks
- *  useProfile()
- *    - Récupère l'ID depuis store/auth.store.ts
- *    - Charge les données via fetchUserProfile()
- *    - Expose : { profile, isLoading, error }
- *
- *  useProfileUpdate()
- *    - Valide via profileUpdateSchema (validators.ts)
- *    - Appelle saveUserProfile()
- *    - Met à jour store/auth.store.ts si le profil courant change
- *    - Expose : { updateProfile, isSubmitting, updateError }
- */
+import { useState } from 'react';
+import { updateProfile } from './api';
+import { ProfileUpdatePayload } from './types';
+import { useAuthStore } from '@/store/auth.store';
+import { AxiosError } from 'axios';
 
-// Implémentation à venir
+export const useProfile = () => {
+  const { user, setUser } = useAuthStore();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const handleUpdateProfile = async (payload: ProfileUpdatePayload) => {
+    if (!user) return;
+
+    setIsSubmitting(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const updatedUser = await updateProfile(user.idUtilisateur, payload, user.login);
+      setUser(updatedUser);
+      setSuccess('Profil mis à jour avec succès.');
+    } catch (err: unknown) {
+      if (err instanceof AxiosError && err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Erreur lors de la mise à jour du profil.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const clearMessages = () => {
+    setError(null);
+    setSuccess(null);
+  };
+
+  return {
+    isSubmitting,
+    error,
+    success,
+    handleUpdateProfile,
+    clearMessages,
+  };
+};

@@ -1,9 +1,10 @@
 /*
  * @file globals.css
  * @role  Feuille de styles globale de l'application Assigamé.
- *        - Importe Tailwind CSS v4 (génère toutes les classes utilitaires)
+ *        - Importe Tailwind CSS v3 (génère toutes les classes utilitaires)
  *        - Définit les variables CSS personnalisées (couleurs de la charte graphique)
- *        - Applique les styles de base (reset, police, body)
+ *        - Applique les styles de base (police, body)
+ *        - Animations globales et utilitaires
  *
  * Palette de couleurs Assigamé (Admin Dashboard) :
  *   Beige sidebar    : #F0E9D9
@@ -11,9 +12,14 @@
  *   Beige cartes     : #EDE8DC
  *   Orange principal : #F2700B  (boutons, accents, liens actifs)
  *   Noir texte       : #111111
+ *
+ * ⚠️  ORDRE IMPÉRATIF : @tailwind DOIT précéder tout @import.
+ *     PostCSS traite les directives @tailwind en premier.
+ *     Un @import url() placé avant les @tailwind les invalide silencieusement.
  */
 
 /* ── Import Tailwind CSS v3 ─────────────────────────────────────────────── */
+/* DOIT être en premier — PostCSS/Tailwind l'exige                          */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -34,9 +40,8 @@
 }
 
 /* ── Styles de base ─────────────────────────────────────────────────────── */
-html {
-  height: 100%;
-}
+/* Note : padding:0 et margin:0 sont gérés par @tailwind base (Preflight).  */
+/* On ne réapplique pas de reset * pour ne pas écraser les utilitaires.     */
 
 html,
 body {
@@ -44,22 +49,76 @@ body {
   overflow-x: hidden;
 }
 
+html {
+  height: 100%;
+}
+
 body {
   min-height: 100%;
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+  letter-spacing: -0.01em;
 }
 
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* ── Animations ─────────────────────────────────────────────────────────── */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ── Utilitaires ────────────────────────────────────────────────────────── */
+
+/* Cache la scrollbar sur les conteneurs horizontaux */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Filtres catégories — scroll tactile fluide (iOS / Android / desktop) */
+.category-filter-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scroll-padding-inline: 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .category-filter-scroll {
+    scroll-behavior: auto;
+  }
+}
+
+/* Animation popup / modal */
+@layer utilities {
+  .animate-fadeIn {
+    animation: fadeIn 0.2s ease-out;
+  }
 }

@@ -84,17 +84,17 @@ export default function AdminDashboardPage() {
 
   // ─── Calcul des statistiques à partir des données chargées ───────────────
   const stats = {
-    totalUtilisateurs:    users.length,
-    utilisateursActifs:   users.filter((u) => u.actif).length,
+    totalUtilisateurs: users.length,
+    utilisateursActifs: users.filter((u) => u.actif).length,
     utilisateursInactifs: users.filter((u) => !u.actif).length,
-    totalProduits:        allProducts.length,
-    produitsDisponibles:  allProducts.filter((p) => p.statut === 'DISPONIBLE').length,
-    produitsVendus:       allProducts.filter((p) => p.statut === 'VENDU').length,
-    totalCategories:      categories.length,
+    totalProduits: allProducts.length,
+    produitsDisponibles: allProducts.filter((p) => p.statut === 'DISPONIBLE').length,
+    produitsVendus: allProducts.filter((p) => p.statut === 'VENDU').length,
+    totalCategories: categories.length,
   };
 
   // ─── Calcul des données pour les graphiques Recharts ─────────────────────
-  
+
   // Données pour le Donut Utilisateurs
   const usersPieData = [
     { name: 'Actifs', value: stats.utilisateursActifs },
@@ -156,8 +156,8 @@ export default function AdminDashboardPage() {
           Utilisateurs
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <StatCard label="Total inscrits"  value={stats.totalUtilisateurs}    icon={<Users size={22} />} />
-          <StatCard label="Comptes actifs"  value={stats.utilisateursActifs}   icon={<UserCheck size={22} />} />
+          <StatCard label="Total inscrits" value={stats.totalUtilisateurs} icon={<Users size={22} />} />
+          <StatCard label="Comptes actifs" value={stats.utilisateursActifs} icon={<UserCheck size={22} />} />
           <StatCard label="Comptes inactifs" value={stats.utilisateursInactifs} icon={<UserX size={22} />} accentColor="#111111" />
         </div>
       </section>
@@ -168,9 +168,9 @@ export default function AdminDashboardPage() {
           Produits
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <StatCard label="Total produits"    value={stats.totalProduits}       icon={<Package size={22} />} />
-          <StatCard label="Disponibles"       value={stats.produitsDisponibles} icon={<ShoppingBag size={22} />} />
-          <StatCard label="Vendus"            value={stats.produitsVendus}      icon={<ShoppingBag size={22} />} accentColor="#111111" />
+          <StatCard label="Total produits" value={stats.totalProduits} icon={<Package size={22} />} />
+          <StatCard label="Disponibles" value={stats.produitsDisponibles} icon={<ShoppingBag size={22} />} />
+          <StatCard label="Vendus" value={stats.produitsVendus} icon={<ShoppingBag size={22} />} accentColor="#111111" />
         </div>
       </section>
 
@@ -187,10 +187,10 @@ export default function AdminDashboardPage() {
       {/* ── Graphiques Recharts ── */}
       <section className="mt-12 pt-8 border-t border-[#d9cdb8]">
         <h3 className="text-xl font-black text-[#111111] mb-6">Analyses Détaillées</h3>
-        
+
         {/* Ligne 1 : Les Donuts */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          
+
           {/* Donut Utilisateurs */}
           <div className="bg-[#EDE8DC] p-6 rounded-xl border border-[#d9cdb8] shadow-sm">
             <h4 className="text-center font-bold text-[#111111] mb-4">Répartition des Utilisateurs</h4>
@@ -231,7 +231,7 @@ export default function AdminDashboardPage() {
 
         {/* Ligne 2 : Les Bar Charts (Option A et Option B) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
+
           {/* Graphique Croissance */}
           <div className="bg-[#F8F5EE] p-6 rounded-xl border border-[#d9cdb8] shadow-sm">
             <h4 className="text-center font-bold text-[#111111] mb-6">Croissance des Inscriptions</h4>
@@ -239,9 +239,9 @@ export default function AdminDashboardPage() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={inscriptionsData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#D9CDB8" vertical={false} />
-                  <XAxis dataKey="name" tick={{fill: '#666666'}} axisLine={false} tickLine={false} />
-                  <YAxis tick={{fill: '#666666'}} axisLine={false} tickLine={false} />
-                  <RechartsTooltip cursor={{fill: '#F0E9D9'}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'}} />
+                  <XAxis dataKey="name" tick={{ fill: '#666666' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: '#666666' }} axisLine={false} tickLine={false} />
+                  <RechartsTooltip cursor={{ fill: '#F0E9D9' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} />
                   <Bar dataKey="inscrits" fill="#F2700B" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -255,9 +255,9 @@ export default function AdminDashboardPage() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={productsByCategoryData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#D9CDB8" vertical={false} />
-                  <XAxis dataKey="name" tick={{fill: '#666666'}} axisLine={false} tickLine={false} />
-                  <YAxis tick={{fill: '#666666'}} axisLine={false} tickLine={false} />
-                  <RechartsTooltip cursor={{fill: '#F0E9D9'}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'}} />
+                  <XAxis dataKey="name" tick={{ fill: '#666666' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: '#666666' }} axisLine={false} tickLine={false} />
+                  <RechartsTooltip cursor={{ fill: '#F0E9D9' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} />
                   <Bar dataKey="produits" fill="#111111" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>

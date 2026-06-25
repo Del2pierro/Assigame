@@ -1,11 +1,22 @@
-/**
- * @file api.ts
- * @feature categories
- * @role  Pont vers product.service.ts pour le chargement des catégories.
- *
- * @functions
- *  - fetchCategories() → Categorie[]
- *    Appelle GET /api/categories via product.service.ts
- */
+import api from '@/services/api.client';
+import { Categorie } from '@/types/models.types';
+import {
+  BackendCategorie,
+  mapBackendCategorie,
+  toBackendCategoryRequest,
+} from '@/lib/category.mapper';
 
-// Implémentation à venir
+export const categoryApi = {
+  fetchCategories: async (): Promise<Categorie[]> => {
+    const response = await api.get<BackendCategorie[]>('/categories');
+    return response.data.map(mapBackendCategorie);
+  },
+
+  createCategory: async (nom: string): Promise<Categorie> => {
+    const response = await api.post<BackendCategorie>(
+      '/categories',
+      toBackendCategoryRequest(nom)
+    );
+    return mapBackendCategorie(response.data);
+  },
+};

@@ -1,18 +1,15 @@
-/**
- * @file store.ts
- * @feature categories
- * @role  Store Zustand des catégories. Mise en cache pour éviter les
- *        rechargements répétés (les catégories ne changent quasiment jamais).
- *
- * @state
- *  - categories        : Categorie[] — liste complète des catégories
- *  - activeCategory    : number | null — idCategorie du filtre actif (null = "Tous")
- *  - isLoaded          : boolean — true si les catégories ont déjà été chargées
- *
- * @actions
- *  - setCategories()
- *  - setActiveCategory()
- *  - clearActiveCategory()
- */
+import { create } from 'zustand';
+import { CategoryState } from './types';
+import { Categorie } from '@/types/models.types';
 
-// Implémentation à venir (Zustand)
+export const useCategoryStore = create<CategoryState>((set) => ({
+  categories: [],
+  activeCategoryId: null,
+  isLoading: false,
+  error: null,
+
+  setCategories: (categories: Categorie[]) => set({ categories }),
+  setActiveCategory: (id: number | null) => set({ activeCategoryId: id }),
+  setLoading: (isLoading: boolean) => set({ isLoading }),
+  setError: (error: string | null) => set({ error }),
+}));

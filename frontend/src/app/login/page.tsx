@@ -1,10 +1,33 @@
-/**
- * @file page.tsx
- * @route  /login
- * @role   Page de connexion vendeur. Redirige vers /dashboard si déjà authentifié.
- *         Assemble uniquement le composant LoginForm de la feature auth.
- */
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/auth.store';
+import { LoginForm } from '@/features/auth/components/LoginForm';
 
 export default function LoginPage() {
-  return null; // À implémenter — importer LoginForm depuis features/auth
+  const router = useRouter();
+  const { isAuthenticated, user, initialize } = useAuthStore();
+
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.typeUtilisateur?.libelle === 'ADMIN') {
+        router.push('/admin');
+      } else {
+        router.push('/dashboard');
+      }
+    }
+  }, [isAuthenticated, user, router]);
+
+  if (isAuthenticated) return null;
+
+  return (
+    <main className="min-h-screen bg-[#F8F5EE] flex items-center justify-center p-4">
+      <LoginForm />
+    </main>
+  );
 }
