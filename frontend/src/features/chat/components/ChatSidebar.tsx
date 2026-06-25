@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import React, { useEffect, useRef } from 'react';
-import { X, Loader2 } from 'lucide-react';
-import { useChat, useStompConnection } from '../hooks';
-import { ChatMessage } from './ChatMessage';
-import { ChatInput } from './ChatInput';
+import React, { useEffect, useRef } from "react";
+import { X, Loader2 } from "lucide-react";
+import { useChat, useStompConnection } from "../hooks";
+import { ChatMessage } from "./ChatMessage";
+import { ChatInput } from "./ChatInput";
 
 export const ChatSidebar: React.FC = () => {
   useStompConnection();
@@ -22,18 +22,23 @@ export const ChatSidebar: React.FC = () => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const currentUserId = typeof window !== 'undefined'
-    ? (localStorage.getItem('guest_id') || localStorage.getItem('user_id') || '')
-    : '';
+  const currentUserId =
+    typeof window !== "undefined"
+      ? localStorage.getItem("guest_id") ||
+        localStorage.getItem("user_id") ||
+        ""
+      : "";
 
   useEffect(() => {
     // Scroll to bottom on new message
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, activeConversationId]);
 
   if (!isSidebarOpen) return null;
 
-  const activeMessages = activeConversationId ? messages[activeConversationId] || [] : [];
+  const activeMessages = activeConversationId
+    ? messages[activeConversationId] || []
+    : [];
 
   return (
     <>
@@ -45,19 +50,24 @@ export const ChatSidebar: React.FC = () => {
 
       {/* Sidebar */}
       <div className="fixed inset-y-0 right-0 z-[70] flex w-full flex-col bg-[#f0e9d9] shadow-2xl sm:w-[400px] transition-transform duration-300 transform translate-x-0">
-        
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-200/50 bg-white/50 px-4 py-4 backdrop-blur-md">
           <div className="flex flex-col">
             <h2 className="text-lg font-semibold text-gray-800">Négociation</h2>
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500">
-                {wsStatus === 'CONNECTED' ? 'Connecté' : wsStatus === 'CONNECTING' ? 'Connexion...' : 'Déconnecté'}
+                {wsStatus === "CONNECTED"
+                  ? "Connecté"
+                  : wsStatus === "CONNECTING"
+                    ? "Connexion..."
+                    : "Déconnecté"}
               </span>
-              <div className={`h-2 w-2 rounded-full ${wsStatus === 'CONNECTED' ? 'bg-green-500' : 'bg-red-500'}`} />
+              <div
+                className={`h-2 w-2 rounded-full ${wsStatus === "CONNECTED" ? "bg-green-500" : "bg-red-500"}`}
+              />
             </div>
           </div>
-          <button 
+          <button
             onClick={() => setSidebarOpen(false)}
             className="rounded-full p-2 text-gray-500 hover:bg-gray-200 transition-colors"
           >
@@ -68,7 +78,9 @@ export const ChatSidebar: React.FC = () => {
         {/* Messages list */}
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
           {chatError && (
-            <p className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700">{chatError}</p>
+            <p className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700">
+              {chatError}
+            </p>
           )}
           {isLoading ? (
             <div className="flex h-full items-center justify-center">
@@ -81,10 +93,10 @@ export const ChatSidebar: React.FC = () => {
             </div>
           ) : (
             activeMessages.map((msg) => (
-              <ChatMessage 
-                key={msg.idMessage} 
-                message={msg} 
-                currentUserId={currentUserId} 
+              <ChatMessage
+                key={msg.idMessage}
+                message={msg}
+                currentUserId={currentUserId}
               />
             ))
           )}
@@ -93,9 +105,9 @@ export const ChatSidebar: React.FC = () => {
 
         {/* Input */}
         <div className="bg-white/50 p-2 backdrop-blur-md">
-          <ChatInput 
-            onSendMessage={sendMessage} 
-            disabled={wsStatus !== 'CONNECTED' || !activeConversationId} 
+          <ChatInput
+            onSendMessage={sendMessage}
+            disabled={wsStatus !== "CONNECTED" || !activeConversationId}
           />
         </div>
       </div>

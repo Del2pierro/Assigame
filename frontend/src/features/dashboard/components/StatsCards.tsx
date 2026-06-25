@@ -33,28 +33,28 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ stats, isLoading }) => {
       <KpiCard
         label="Total articles"
         value={stats.totalArticles}
-        icon={<Package size={18} />}
-        accentColor="#6366f1"
+        icon={<Package size={20} />}
+        accentColor="#F2700B"
         description="Dans votre catalogue"
       />
       <KpiCard
         label="En vente"
         value={stats.totalEnVente}
-        icon={<ShoppingBag size={18} />}
+        icon={<ShoppingBag size={20} />}
         accentColor="#006A4E"
         description="Disponibles à l'achat"
       />
       <KpiCard
         label="Réservés"
         value={stats.totalReserves}
-        icon={<Clock size={18} />}
+        icon={<Clock size={20} />}
         accentColor="#F2700B"
         description="En cours de négociation"
       />
       <KpiCard
         label="Vendus"
         value={stats.totalVendus}
-        icon={<CheckCircle size={18} />}
+        icon={<CheckCircle size={20} />}
         accentColor="#111111"
         trend={
           stats.totalArticles > 0

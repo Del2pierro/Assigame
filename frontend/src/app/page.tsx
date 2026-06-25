@@ -59,12 +59,8 @@ function Navbar({
             className="h-10 md:h-12 w-auto object-contain"
           />
           <div className="hidden sm:flex flex-col leading-none">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
-              Marketplace
-            </span>
-
             <span className="text-[18px] font-bold text-zinc-900">
-              Assigamé
+              Marketplace
             </span>
           </div>
         </Link>

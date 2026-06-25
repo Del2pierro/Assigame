@@ -9,11 +9,14 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle2,
+  Tag,
 } from 'lucide-react';
 import { productSchema } from '@/lib/validators';
 import { productApi } from '../api';
 import { categoryApi } from '@/features/categories/api';
 import { Categorie } from '@/types/models.types';
+
+const OTHER_CATEGORY = '__other__';
 
 interface ProductFormProps {
   mode: 'create' | 'edit';
@@ -30,17 +33,24 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const [description, setDescription] = useState('');
   const [prix, setPrix] = useState('');
   const [idCategorie, setIdCategorie] = useState('');
+  const [customCategoryName, setCustomCategoryName] = useState('');
   const [imageBase64, setImageBase64] = useState<string | undefined>();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const [categories, setCategories] = useState<Categorie[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [isLoadingData, setIsLoadingData] = useState(mode === 'edit');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    categoryApi.fetchCategories().then(setCategories).catch(console.error);
+    setIsLoadingCategories(true);
+    categoryApi
+      .fetchCategories()
+      .then(setCategories)
+      .catch((err: Error) => setError(err.message))
+      .finally(() => setIsLoadingCategories(false));
   }, []);
 
   useEffect(() => {
@@ -88,18 +98,32 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     setError(null);
     setFieldErrors({});
 
+    const isOtherCategory = idCategorie === OTHER_CATEGORY;
+
+    if (!idCategorie) {
+      setFieldErrors({ idCategorie: 'La catégorie est obligatoire.' });
+      return;
+    }
+
+    if (isOtherCategory && !customCategoryName.trim()) {
+      setFieldErrors({ customCategory: 'Indiquez le nom de la nouvelle catégorie.' });
+      return;
+    }
+
     const parsed = productSchema.safeParse({
       nom,
       description,
       prix,
-      idCategorie,
+      idCategorie: isOtherCategory ? 1 : idCategorie,
     });
 
     if (!parsed.success) {
       const errors: Record<string, string> = {};
       parsed.error.issues.forEach((issue) => {
         const key = issue.path[0]?.toString() ?? 'form';
-        errors[key] = issue.message;
+        if (key !== 'idCategorie' || !isOtherCategory) {
+          errors[key] = issue.message;
+        }
       });
       setFieldErrors(errors);
       return;
@@ -119,6 +143,13 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
     setIsSubmitting(true);
     try {
+      let categoryId = parsed.data.idCategorie;
+
+      if (isOtherCategory) {
+        const created = await categoryApi.createCategory(customCategoryName.trim());
+        categoryId = created.idCategorie;
+      }
+
       const payload = {
         nom: parsed.data.nom,
         description: parsed.data.description,
@@ -127,11 +158,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       };
 
       if (mode === 'create') {
-        await productApi.createProduct(
-          Number(userId),
-          parsed.data.idCategorie,
-          payload
-        );
+        await productApi.createProduct(Number(userId), categoryId, payload);
       } else if (productId) {
         await productApi.updateProduct(productId, payload);
       }
@@ -153,19 +180,21 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   }
 
   const title = mode === 'create' ? 'Nouvel article' : 'Modifier l\'article';
+  const inputClass =
+    'w-full rounded-xl border border-[#d9cdb8] bg-[#F8F5EE] px-4 py-2.5 text-sm text-[#111111] focus:border-[#F2700B] focus:outline-none focus:ring-2 focus:ring-[#F2700B]/20';
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex items-center gap-4">
         <Link
           href="/dashboard/articles"
-          className="flex h-9 w-9 items-center justify-center rounded-lg border border-neutral-200 text-neutral-500 transition-colors hover:bg-neutral-50"
+          className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#d9cdb8] text-[#666666] transition-colors hover:bg-[#F0E9D9]"
         >
           <ArrowLeft size={18} />
         </Link>
         <div>
-          <h2 className="text-xl font-semibold text-neutral-900">{title}</h2>
-          <p className="text-sm text-neutral-500">
+          <h2 className="text-xl font-black text-[#111111]">{title}</h2>
+          <p className="text-sm text-[#666666]">
             {mode === 'create'
               ? 'Remplissez les informations de votre annonce'
               : 'Mettez à jour les informations de votre annonce'}
@@ -175,11 +204,11 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
       <form
         onSubmit={handleSubmit}
-        className="overflow-hidden rounded-xl border border-neutral-200/80 bg-white shadow-sm"
+        className="overflow-hidden rounded-xl border border-[#d9cdb8] bg-[#EDE8DC] shadow-sm"
       >
         <div className="space-y-6 p-6">
           {error && (
-            <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               <AlertCircle size={18} className="mt-0.5 shrink-0" />
               {error}
             </div>
@@ -187,11 +216,11 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
           {/* Image */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-neutral-700">
+            <label className="mb-2 block text-sm font-semibold text-[#444444]">
               Photo du produit {mode === 'create' && <span className="text-red-500">*</span>}
             </label>
             <div className="flex flex-col items-center gap-4 sm:flex-row">
-              <div className="relative flex h-36 w-36 shrink-0 items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-neutral-200 bg-neutral-50">
+              <div className="relative flex h-36 w-36 shrink-0 items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-[#d9cdb8] bg-[#F8F5EE]">
                 {imagePreview ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -200,10 +229,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <Package size={32} className="text-neutral-300" />
+                  <Package size={32} className="text-[#c4b89a]" />
                 )}
               </div>
-              <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-neutral-200 px-4 py-2.5 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50">
+              <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[#d9cdb8] bg-[#F8F5EE] px-4 py-2.5 text-sm font-medium text-[#444444] transition-colors hover:bg-[#F0E9D9]">
                 <Upload size={16} />
                 Choisir une image
                 <input
@@ -221,7 +250,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
           {/* Nom */}
           <div>
-            <label htmlFor="nom" className="mb-2 block text-sm font-medium text-neutral-700">
+            <label htmlFor="nom" className="mb-2 block text-sm font-semibold text-[#444444]">
               Nom du produit <span className="text-red-500">*</span>
             </label>
             <input
@@ -229,7 +258,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               type="text"
               value={nom}
               onChange={(e) => setNom(e.target.value)}
-              className="w-full rounded-lg border border-neutral-200 px-4 py-2.5 text-sm focus:border-[#F2700B] focus:outline-none focus:ring-2 focus:ring-[#F2700B]/20"
+              className={inputClass}
               placeholder="Ex : Robe wax traditionnelle"
             />
             {fieldErrors.nom && (
@@ -239,25 +268,54 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
           {/* Catégorie */}
           <div>
-            <label htmlFor="categorie" className="mb-2 block text-sm font-medium text-neutral-700">
+            <label htmlFor="categorie" className="mb-2 block text-sm font-semibold text-[#444444]">
               Catégorie <span className="text-red-500">*</span>
             </label>
-            <select
-              id="categorie"
-              value={idCategorie}
-              onChange={(e) => setIdCategorie(e.target.value)}
-              disabled={mode === 'edit'}
-              className="w-full rounded-lg border border-neutral-200 px-4 py-2.5 text-sm focus:border-[#F2700B] focus:outline-none focus:ring-2 focus:ring-[#F2700B]/20 disabled:bg-neutral-50 disabled:text-neutral-500"
-            >
-              <option value="">Sélectionner une catégorie</option>
-              {categories.map((cat) => (
-                <option key={cat.idCategorie} value={cat.idCategorie}>
-                  {cat.nom}
-                </option>
-              ))}
-            </select>
+            {isLoadingCategories ? (
+              <div className="flex items-center gap-2 rounded-xl border border-[#d9cdb8] bg-[#F8F5EE] px-4 py-3 text-sm text-[#666666]">
+                <Loader2 size={16} className="animate-spin text-[#F2700B]" />
+                Chargement des catégories…
+              </div>
+            ) : (
+              <select
+                id="categorie"
+                value={idCategorie}
+                onChange={(e) => setIdCategorie(e.target.value)}
+                disabled={mode === 'edit'}
+                className={`${inputClass} disabled:bg-[#F0E9D9] disabled:text-[#666666]`}
+              >
+                <option value="">Sélectionner une catégorie</option>
+                {categories.map((cat) => (
+                  <option key={cat.idCategorie} value={cat.idCategorie}>
+                    {cat.nom}
+                  </option>
+                ))}
+                {mode === 'create' && (
+                  <option value={OTHER_CATEGORY}>Autre — créer une catégorie</option>
+                )}
+              </select>
+            )}
+            {idCategorie === OTHER_CATEGORY && mode === 'create' && (
+              <div className="mt-3">
+                <label htmlFor="customCategory" className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-[#444444]">
+                  <Tag size={14} className="text-[#F2700B]" />
+                  Nom de la nouvelle catégorie <span className="text-red-500">*</span>
+                </label>
+                <input
+                  id="customCategory"
+                  type="text"
+                  value={customCategoryName}
+                  onChange={(e) => setCustomCategoryName(e.target.value)}
+                  className={inputClass}
+                  placeholder="Ex : Accessoires, Bijoux…"
+                />
+                {fieldErrors.customCategory && (
+                  <p className="mt-1.5 text-xs text-red-600">{fieldErrors.customCategory}</p>
+                )}
+              </div>
+            )}
             {mode === 'edit' && (
-              <p className="mt-1 text-xs text-neutral-400">
+              <p className="mt-1 text-xs text-[#666666]">
                 La catégorie ne peut pas être modifiée après publication.
               </p>
             )}
@@ -268,7 +326,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
           {/* Prix */}
           <div>
-            <label htmlFor="prix" className="mb-2 block text-sm font-medium text-neutral-700">
+            <label htmlFor="prix" className="mb-2 block text-sm font-semibold text-[#444444]">
               Prix (F CFA) <span className="text-red-500">*</span>
             </label>
             <input
@@ -277,7 +335,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               min="1"
               value={prix}
               onChange={(e) => setPrix(e.target.value)}
-              className="w-full rounded-lg border border-neutral-200 px-4 py-2.5 text-sm focus:border-[#F2700B] focus:outline-none focus:ring-2 focus:ring-[#F2700B]/20"
+              className={inputClass}
               placeholder="Ex : 15000"
             />
             {fieldErrors.prix && (
@@ -287,7 +345,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
           {/* Description */}
           <div>
-            <label htmlFor="description" className="mb-2 block text-sm font-medium text-neutral-700">
+            <label htmlFor="description" className="mb-2 block text-sm font-semibold text-[#444444]">
               Description <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -295,7 +353,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
-              className="w-full resize-none rounded-lg border border-neutral-200 px-4 py-2.5 text-sm focus:border-[#F2700B] focus:outline-none focus:ring-2 focus:ring-[#F2700B]/20"
+              className={`${inputClass} resize-none`}
               placeholder="Décrivez votre article (état, taille, matière…)"
             />
             {fieldErrors.description && (
@@ -304,17 +362,17 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 border-t border-neutral-100 bg-neutral-50/50 px-6 py-4">
+        <div className="flex items-center justify-end gap-3 border-t border-[#d9cdb8] bg-[#F0E9D9]/50 px-6 py-4">
           <Link
             href="/dashboard/articles"
-            className="rounded-lg px-4 py-2.5 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-100"
+            className="rounded-xl px-4 py-2.5 text-sm font-medium text-[#666666] transition-colors hover:bg-[#F0E9D9]"
           >
             Annuler
           </Link>
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="flex items-center gap-2 rounded-lg bg-[#F2700B] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#e0650a] disabled:opacity-60"
+            disabled={isSubmitting || isLoadingCategories}
+            className="flex items-center gap-2 rounded-xl bg-[#F2700B] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:opacity-90 disabled:opacity-60"
           >
             {isSubmitting ? (
               <>

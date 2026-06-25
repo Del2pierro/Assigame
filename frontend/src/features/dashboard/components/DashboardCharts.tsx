@@ -36,10 +36,11 @@ const STATUS_COLORS = ['#006A4E', '#F2700B', '#111111'];
 
 const tooltipStyle = {
   borderRadius: '8px',
-  border: '1px solid #e5e5e5',
+  border: '1px solid #d9cdb8',
   boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
   fontSize: '12px',
   padding: '8px 12px',
+  backgroundColor: '#F8F5EE',
 };
 
 function CustomPieTooltip({
@@ -52,14 +53,14 @@ function CustomPieTooltip({
   if (!active || !payload?.length) return null;
   const item = payload[0];
   return (
-    <div style={tooltipStyle} className="bg-white">
+    <div style={tooltipStyle}>
       <div className="flex items-center gap-2">
         <span
           className="h-2 w-2 rounded-full"
           style={{ backgroundColor: item.payload.fill }}
         />
-        <span className="text-neutral-600">{item.name}</span>
-        <span className="font-semibold text-neutral-900">{item.value}</span>
+        <span className="text-[#666666]">{item.name}</span>
+        <span className="font-semibold text-[#111111]">{item.value}</span>
       </div>
     </div>
   );
@@ -76,9 +77,9 @@ function CustomBarTooltip({
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div style={tooltipStyle} className="bg-white">
-      <p className="mb-1 text-xs text-neutral-500">{label}</p>
-      <p className="text-sm font-semibold text-neutral-900">
+    <div style={tooltipStyle}>
+      <p className="mb-1 text-xs text-[#666666]">{label}</p>
+      <p className="text-sm font-semibold text-[#111111]">
         {payload[0].value} produit{payload[0].value > 1 ? 's' : ''}
       </p>
     </div>
@@ -132,12 +133,12 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({
 
   if (products.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-neutral-200 bg-white px-8 py-16 text-center">
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-neutral-50">
-          <BarChart3 size={24} className="text-neutral-400" />
+      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[#d9cdb8] px-8 py-16 text-center" style={{ backgroundColor: '#EDE8DC' }}>
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl" style={{ backgroundColor: '#F0E9D9' }}>
+          <BarChart3 size={24} className="text-[#666666]" />
         </div>
-        <p className="text-sm font-medium text-neutral-900">Aucune donnée disponible</p>
-        <p className="mt-1 max-w-sm text-xs text-neutral-500">
+        <p className="text-sm font-bold text-[#111111]">Aucune donnée disponible</p>
+        <p className="mt-1 max-w-sm text-xs text-[#666666]">
           Publiez vos premiers articles pour visualiser la répartition et les performances par catégorie.
         </p>
       </div>
@@ -173,19 +174,19 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({
             {/* Légende custom */}
             <div className="absolute bottom-0 left-0 right-0 flex flex-wrap justify-center gap-x-4 gap-y-2">
               {statusPieData.map((item) => (
-                <div key={item.name} className="flex items-center gap-1.5 text-xs text-neutral-600">
+                <div key={item.name} className="flex items-center gap-1.5 text-xs text-[#666666]">
                   <span
                     className="h-2 w-2 rounded-full"
                     style={{ backgroundColor: item.fill }}
                   />
                   {item.name}
-                  <span className="font-medium text-neutral-900">{item.value}</span>
+                  <span className="font-medium text-[#111111]">{item.value}</span>
                 </div>
               ))}
             </div>
           </div>
         ) : (
-          <div className="flex h-[280px] flex-col items-center justify-center text-neutral-400">
+          <div className="flex h-[280px] flex-col items-center justify-center text-[#999999]">
             <PieChartIcon size={32} className="mb-2 opacity-40" />
             <p className="text-xs">Pas encore de statistiques</p>
           </div>
@@ -206,12 +207,12 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({
             >
               <CartesianGrid
                 strokeDasharray="3 3"
-                stroke="#f0f0f0"
+                stroke="#d9cdb8"
                 vertical={false}
               />
               <XAxis
                 dataKey="name"
-                tick={{ fill: '#737373', fontSize: 11 }}
+                tick={{ fill: '#666666', fontSize: 11 }}
                 axisLine={false}
                 tickLine={false}
                 interval={0}
@@ -220,7 +221,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({
                 height={productsByCategoryData.length > 4 ? 50 : 30}
               />
               <YAxis
-                tick={{ fill: '#737373', fontSize: 11 }}
+                tick={{ fill: '#666666', fontSize: 11 }}
                 axisLine={false}
                 tickLine={false}
                 allowDecimals={false}

@@ -1,5 +1,6 @@
 import api from './api.client';
 import { Produit, Categorie } from '@/types/models.types';
+import { BackendCategorie, mapBackendCategorie } from '@/lib/category.mapper';
 import { BackendProduit, mapBackendProduit, ProductFormPayload, toBackendProduitRequest } from '@/lib/product.mapper';
 
 export const productService = {
@@ -58,7 +59,7 @@ export const productService = {
   // --- Catégories ---
 
   getCategories: async (): Promise<Categorie[]> => {
-    const response = await api.get<Categorie[]>('/categories');
-    return response.data;
-  }
+    const response = await api.get<BackendCategorie[]>('/categories');
+    return response.data.map(mapBackendCategorie);
+  },
 };

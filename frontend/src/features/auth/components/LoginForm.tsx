@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useLogin } from '../hooks';
-import { LogIn, Lock, Mail, AlertCircle } from 'lucide-react';
+import { LogIn, Lock, Mail, AlertCircle, ArrowLeft } from 'lucide-react';
 
 export const LoginForm: React.FC = () => {
   const { handleLogin, formError, isSubmitting, clearFormState } = useLogin();
@@ -21,7 +21,16 @@ export const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-md p-8 rounded-3xl border border-[#d9cdb8]/60 bg-white/80 backdrop-blur-xl shadow-xl shadow-stone-100">
+    <div className="w-full max-w-md">
+      <Link
+        href="/"
+        className="mb-4 inline-flex items-center gap-2 rounded-xl border border-[#d9cdb8]/60 bg-white/80 px-4 py-2.5 text-[13px] font-semibold text-[#666666] shadow-sm transition-all hover:bg-white hover:text-[#111111] hover:shadow-md"
+      >
+        <ArrowLeft size={16} className="text-[#F2700B]" />
+        Retour au catalogue
+      </Link>
+
+      <div className="p-8 rounded-3xl border border-[#d9cdb8]/60 bg-white/80 backdrop-blur-xl shadow-xl shadow-stone-100">
       <div className="flex flex-col items-center mb-8">
         <div className="h-12 w-12 rounded-2xl flex items-center justify-center bg-gradient-to-r from-[#F2700B] to-[#e05a00] text-white shadow-lg shadow-orange-500/20 mb-4">
           <LogIn size={22} />
@@ -100,6 +109,7 @@ export const LoginForm: React.FC = () => {
             Créer un compte vendeur
           </Link>
         </p>
+      </div>
       </div>
     </div>
   );
