@@ -1,59 +1,75 @@
 /**
  * @file page.tsx
  * @route  /admin
- * @role   Page d'accueil du tableau de bord administrateur.
- *         Affiche les statistiques globales de la plateforme.
+ * @role   Page d'accueil du tableau de bord administrateur système.
+ *         Vue synthétique de la plateforme.
+ *         Assemble : AdminStatsCards.
+ *
+ * @seo
+ *  title : "Administration — Assigame"
+ *
+ * @displays
+ *  - Nombre total d'utilisateurs inscrits
+ *  - Nombre d'utilisateurs actifs / désactivés
+ *  - Nombre total de produits sur la plateforme
+ *  - Nombre de catégories disponibles
  *
  * Route PROTÉGÉE — Rôle ADMIN requis (via AdminLayout).
  */
 
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { Users, Package, Tag, UserCheck, UserX, ShoppingBag } from 'lucide-react';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from 'recharts';
-import { useAdminStore } from '@/features/admin/store';
-import { fetchAllUsers, fetchAllProductsAdmin, fetchAllCategories } from '@/features/admin/api';
+import { useEffect } from "react";
+import { Users, UserCheck, UserX, Package, ShoppingBag, Tag } from "lucide-react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip as RechartsTooltip,
+  Legend,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from "recharts";
+import { useAdminStore } from "@/features/admin/store";
+import { fetchAllUsers, fetchAllProductsAdmin, fetchAllCategories } from "@/features/admin/api";
 
-// ─── Composant carte de statistique ─────────────────────────────────────────
-
-interface StatCardProps {
+function StatCard({ label, value, icon, accentColor = "#F2700B" }: {
   label: string;
   value: number;
   icon: React.ReactNode;
-  accentColor?: string; // Couleur de la valeur (orange par défaut)
-}
-
-function StatCard({ label, value, icon, accentColor = '#F2700B' }: StatCardProps) {
+  accentColor?: string;
+}) {
   return (
-    <div
-      className="flex items-center gap-4 rounded-xl p-6 shadow-sm border border-[#d9cdb8]"
-      style={{ backgroundColor: '#EDE8DC' }}
-    >
-      {/* Icône */}
+    <div className="bg-[#EDE8DC] p-4 rounded-xl border border-[#d9cdb8] flex items-center gap-4 transition-transform hover:-translate-y-1 shadow-sm">
       <div
-        className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
-        style={{ backgroundColor: '#F2700B22' }} // Orange très transparent
+        className="w-12 h-12 rounded-full flex items-center justify-center text-white"
+        style={{ backgroundColor: accentColor }}
       >
-        <span style={{ color: '#F2700B' }}>{icon}</span>
+        {icon}
       </div>
-
-      {/* Valeur + libellé */}
       <div>
-        <p className="text-3xl font-black" style={{ color: accentColor }}>
-          {value}
-        </p>
-        <p className="text-sm font-medium text-[#444444]">{label}</p>
+        <div className="text-2xl font-black text-[#111111]">{value}</div>
+        <div className="text-xs text-[#666666] font-medium uppercase tracking-wider">{label}</div>
       </div>
     </div>
   );
 }
 
-// ─── Page principale ─────────────────────────────────────────────────────────
-
 export default function AdminDashboardPage() {
-  const { users, allProducts, categories, isLoading, setUsers, setAllProducts, setCategories, setIsLoading } =
-    useAdminStore();
+  const {
+    users,
+    allProducts,
+    categories,
+    isLoading,
+    setUsers,
+    setAllProducts,
+    setCategories,
+    setIsLoading,
+  } = useAdminStore();
 
   /**
    * Au chargement de la page, on récupère les données du backend
@@ -73,7 +89,10 @@ export default function AdminDashboardPage() {
         setAllProducts(productsData);
         setCategories(categoriesData);
       } catch (error) {
-        console.error('Erreur lors du chargement des statistiques admin :', error);
+        console.error(
+          "Erreur lors du chargement des statistiques admin :",
+          error,
+        );
       } finally {
         setIsLoading(false);
       }
@@ -88,8 +107,9 @@ export default function AdminDashboardPage() {
     utilisateursActifs: users.filter((u) => u.actif).length,
     utilisateursInactifs: users.filter((u) => !u.actif).length,
     totalProduits: allProducts.length,
-    produitsDisponibles: allProducts.filter((p) => p.statut === 'DISPONIBLE').length,
-    produitsVendus: allProducts.filter((p) => p.statut === 'VENDU').length,
+    produitsDisponibles: allProducts.filter((p) => p.statut === "DISPONIBLE")
+      .length,
+    produitsVendus: allProducts.filter((p) => p.statut === "VENDU").length,
     totalCategories: categories.length,
   };
 
@@ -97,29 +117,45 @@ export default function AdminDashboardPage() {
 
   // Données pour le Donut Utilisateurs
   const usersPieData = [
-    { name: 'Actifs', value: stats.utilisateursActifs },
-    { name: 'Inactifs', value: stats.utilisateursInactifs },
+    { name: "Actifs", value: stats.utilisateursActifs },
+    { name: "Inactifs", value: stats.utilisateursInactifs },
   ];
   // Le vert du drapeau togolais (#006A4E) pour les comptes actifs, et Noir pour inactifs
-  const USERS_COLORS = ['#006A4E', '#111111'];
+  const USERS_COLORS = ["#006A4E", "#111111"];
 
   // Données pour le Donut Produits
   const productsPieData = [
-    { name: 'Disponibles', value: stats.produitsDisponibles },
-    { name: 'Vendus', value: stats.produitsVendus },
+    { name: "Disponibles", value: stats.produitsDisponibles },
+    { name: "Vendus", value: stats.produitsVendus },
   ];
-  const PRODUCTS_COLORS = ['#F2700B', '#111111'];
+  const PRODUCTS_COLORS = ["#F2700B", "#111111"];
 
   // Option A : Inscriptions par mois (Calculées dynamiquement depuis les vrais utilisateurs)
   const inscriptionsData = (() => {
-    const moisNoms = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
-    const grouped = users.reduce((acc, user) => {
-      if (!user.dateInscription) return acc;
-      const date = new Date(user.dateInscription);
-      const moisIndex = date.getMonth(); // 0 à 11
-      acc[moisIndex] = (acc[moisIndex] || 0) + 1;
-      return acc;
-    }, {} as Record<number, number>);
+    const moisNoms = [
+      "Jan",
+      "Fév",
+      "Mar",
+      "Avr",
+      "Mai",
+      "Juin",
+      "Jul",
+      "Aoû",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Déc",
+    ];
+    const grouped = users.reduce(
+      (acc, user) => {
+        if (!user.dateInscription) return acc;
+        const date = new Date(user.dateInscription);
+        const moisIndex = date.getMonth(); // 0 à 11
+        acc[moisIndex] = (acc[moisIndex] || 0) + 1;
+        return acc;
+      },
+      {} as Record<number, number>,
+    );
 
     return Object.entries(grouped).map(([moisIndex, count]) => ({
       name: moisNoms[Number(moisIndex)],
@@ -128,9 +164,11 @@ export default function AdminDashboardPage() {
   })();
 
   // Option B : Produits par catégorie (Calculés dynamiquement depuis les vraies catégories)
-  const productsByCategoryData = categories.map(cat => ({
+  const productsByCategoryData = categories.map((cat) => ({
     name: cat.nom,
-    produits: allProducts.filter(p => p.categorie.idCategorie === cat.idCategorie).length
+    produits: allProducts.filter(
+      (p) => p.categorie.idCategorie === cat.idCategorie,
+    ).length,
   }));
 
   return (
@@ -156,9 +194,22 @@ export default function AdminDashboardPage() {
           Utilisateurs
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <StatCard label="Total inscrits" value={stats.totalUtilisateurs} icon={<Users size={22} />} />
-          <StatCard label="Comptes actifs" value={stats.utilisateursActifs} icon={<UserCheck size={22} />} />
-          <StatCard label="Comptes inactifs" value={stats.utilisateursInactifs} icon={<UserX size={22} />} accentColor="#111111" />
+          <StatCard
+            label="Total inscrits"
+            value={stats.totalUtilisateurs}
+            icon={<Users size={22} />}
+          />
+          <StatCard
+            label="Comptes actifs"
+            value={stats.utilisateursActifs}
+            icon={<UserCheck size={22} />}
+          />
+          <StatCard
+            label="Comptes inactifs"
+            value={stats.utilisateursInactifs}
+            icon={<UserX size={22} />}
+            accentColor="#111111"
+          />
         </div>
       </section>
 
@@ -168,9 +219,22 @@ export default function AdminDashboardPage() {
           Produits
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <StatCard label="Total produits" value={stats.totalProduits} icon={<Package size={22} />} />
-          <StatCard label="Disponibles" value={stats.produitsDisponibles} icon={<ShoppingBag size={22} />} />
-          <StatCard label="Vendus" value={stats.produitsVendus} icon={<ShoppingBag size={22} />} accentColor="#111111" />
+          <StatCard
+            label="Total produits"
+            value={stats.totalProduits}
+            icon={<Package size={22} />}
+          />
+          <StatCard
+            label="Disponibles"
+            value={stats.produitsDisponibles}
+            icon={<ShoppingBag size={22} />}
+          />
+          <StatCard
+            label="Vendus"
+            value={stats.produitsVendus}
+            icon={<ShoppingBag size={22} />}
+            accentColor="#111111"
+          />
         </div>
       </section>
 
@@ -180,26 +244,42 @@ export default function AdminDashboardPage() {
           Catégories
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <StatCard label="Catégories actives" value={stats.totalCategories} icon={<Tag size={22} />} />
+          <StatCard
+            label="Catégories actives"
+            value={stats.totalCategories}
+            icon={<Tag size={22} />}
+          />
         </div>
       </section>
 
       {/* ── Graphiques Recharts ── */}
       <section className="mt-12 pt-8 border-t border-[#d9cdb8]">
-        <h3 className="text-xl font-black text-[#111111] mb-6">Analyses Détaillées</h3>
+        <h3 className="text-xl font-black text-[#111111] mb-6">
+          Analyses Détaillées
+        </h3>
 
         {/* Ligne 1 : Les Donuts */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-
           {/* Donut Utilisateurs */}
           <div className="bg-[#EDE8DC] p-6 rounded-xl border border-[#d9cdb8] shadow-sm">
-            <h4 className="text-center font-bold text-[#111111] mb-4">Répartition des Utilisateurs</h4>
+            <h4 className="text-center font-bold text-[#111111] mb-4">
+              Répartition des Utilisateurs
+            </h4>
             <div className="h-[250px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={usersPieData} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                  <Pie
+                    data={usersPieData}
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
                     {usersPieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={USERS_COLORS[index % USERS_COLORS.length]} />
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={USERS_COLORS[index % USERS_COLORS.length]}
+                      />
                     ))}
                   </Pie>
                   <RechartsTooltip />
@@ -211,13 +291,24 @@ export default function AdminDashboardPage() {
 
           {/* Donut Produits */}
           <div className="bg-[#EDE8DC] p-6 rounded-xl border border-[#d9cdb8] shadow-sm">
-            <h4 className="text-center font-bold text-[#111111] mb-4">État des Produits</h4>
+            <h4 className="text-center font-bold text-[#111111] mb-4">
+              État des Produits
+            </h4>
             <div className="h-[250px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={productsPieData} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                  <Pie
+                    data={productsPieData}
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
                     {productsPieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={PRODUCTS_COLORS[index % PRODUCTS_COLORS.length]} />
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={PRODUCTS_COLORS[index % PRODUCTS_COLORS.length]}
+                      />
                     ))}
                   </Pie>
                   <RechartsTooltip />
@@ -226,23 +317,50 @@ export default function AdminDashboardPage() {
               </ResponsiveContainer>
             </div>
           </div>
-
         </div>
 
         {/* Ligne 2 : Les Bar Charts (Option A et Option B) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
           {/* Graphique Croissance */}
           <div className="bg-[#F8F5EE] p-6 rounded-xl border border-[#d9cdb8] shadow-sm">
-            <h4 className="text-center font-bold text-[#111111] mb-6">Croissance des Inscriptions</h4>
+            <h4 className="text-center font-bold text-[#111111] mb-6">
+              Croissance des Inscriptions
+            </h4>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={inscriptionsData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#D9CDB8" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fill: '#666666' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: '#666666' }} axisLine={false} tickLine={false} />
-                  <RechartsTooltip cursor={{ fill: '#F0E9D9' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} />
-                  <Bar dataKey="inscrits" fill="#F2700B" radius={[4, 4, 0, 0]} />
+                <BarChart
+                  data={inscriptionsData}
+                  margin={{ top: 5, right: 20, left: -20, bottom: 5 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#D9CDB8"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fill: "#666666" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{ fill: "#666666" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <RechartsTooltip
+                    cursor={{ fill: "#F0E9D9" }}
+                    contentStyle={{
+                      borderRadius: "8px",
+                      border: "none",
+                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                    }}
+                  />
+                  <Bar
+                    dataKey="inscrits"
+                    fill="#F2700B"
+                    radius={[4, 4, 0, 0]}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -250,20 +368,48 @@ export default function AdminDashboardPage() {
 
           {/* Graphique Catégories */}
           <div className="bg-[#F8F5EE] p-6 rounded-xl border border-[#d9cdb8] shadow-sm">
-            <h4 className="text-center font-bold text-[#111111] mb-6">Produits par Catégorie</h4>
+            <h4 className="text-center font-bold text-[#111111] mb-6">
+              Produits par Catégorie
+            </h4>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={productsByCategoryData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#D9CDB8" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fill: '#666666' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: '#666666' }} axisLine={false} tickLine={false} />
-                  <RechartsTooltip cursor={{ fill: '#F0E9D9' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} />
-                  <Bar dataKey="produits" fill="#111111" radius={[4, 4, 0, 0]} />
+                <BarChart
+                  data={productsByCategoryData}
+                  margin={{ top: 5, right: 20, left: -20, bottom: 5 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#D9CDB8"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fill: "#666666" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{ fill: "#666666" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <RechartsTooltip
+                    cursor={{ fill: "#F0E9D9" }}
+                    contentStyle={{
+                      borderRadius: "8px",
+                      border: "none",
+                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                    }}
+                  />
+                  <Bar
+                    dataKey="produits"
+                    fill="#111111"
+                    radius={[4, 4, 0, 0]}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
-
         </div>
       </section>
     </div>

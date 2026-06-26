@@ -2,50 +2,50 @@
  * @file layout.tsx
  * @route  /admin/* (toutes les sous-routes de l'espace admin)
  * @role   Layout protégé de l'espace administrateur système.
- *         Inclut la sidebar de navigation admin avec le logo Assigamé,
- *         les liens vers les sections, et le profil de l'admin connecté.
+ *         Double protection :
+ *           1. Authentification : vérifie qu'un utilisateur est connecté
+ *           2. Rôle ADMIN : vérifie que typeUtilisateur.libelle === 'ADMIN'
+ *         Si l'une des deux conditions échoue, redirige vers /login ou /dashboard.
  *
- * ⚠️ Ce layout protège l'accès : seul un utilisateur avec le rôle ADMIN
- *    peut accéder aux pages enfants. Les autres sont redirigés vers /login.
+ *         Inclut :
+ *         - La sidebar de navigation admin (liens vers les sections)
+ *         - Un header avec le nom de l'admin connecté et un bouton déconnexion
+ *
+ * ⚠️ Ce layout utilise AdminGuard depuis components/shared/AdminGuard
+ *    Ne JAMAIS contourner cette protection dans les pages enfants.
  */
 
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { useAuthStore } from '@/store/auth.store';
-import {
-  LayoutDashboard,
-  Users,
-  Package,
-  Tag,
-  LogOut,
-} from 'lucide-react';
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useAuthStore } from "@/store/auth.store";
+import { LayoutDashboard, Users, Package, Tag, LogOut } from "lucide-react";
 
 // ─── Liens de navigation de la sidebar ──────────────────────────────────────
 const NAV_LINKS = [
-  { href: '/admin',             label: 'Tableau de bord', icon: LayoutDashboard },
-  { href: '/admin/utilisateurs',label: 'Utilisateurs',    icon: Users           },
-  { href: '/admin/produits',    label: 'Produits',        icon: Package         },
-  { href: '/admin/categories',  label: 'Catégories',      icon: Tag             },
+  { href: "/admin", label: "Tableau de bord", icon: LayoutDashboard },
+  { href: "/admin/utilisateurs", label: "Utilisateurs", icon: Users },
+  { href: "/admin/produits", label: "Produits", icon: Package },
+  { href: "/admin/categories", label: "Catégories", icon: Tag },
 ];
 
 // ─── Composant Sidebar ───────────────────────────────────────────────────────
 function AdminSidebar() {
   const pathname = usePathname();
-  const router   = useRouter();
+  const router = useRouter();
 
   /** Déconnexion : efface le store et le localStorage et redirige vers /login */
   const handleLogout = () => {
     useAuthStore.getState().clearUser();
-    router.push('/login');
+    router.push("/login");
   };
 
   return (
     <aside
       className="flex flex-col w-64 h-screen shrink-0 border-r border-[#d9cdb8]"
-      style={{ backgroundColor: '#F0E9D9' }}
+      style={{ backgroundColor: "#F0E9D9" }}
     >
       {/* ── Logo ── */}
       <div className="flex items-center justify-center h-24 border-b border-[#d9cdb8] p-4">
@@ -63,8 +63,8 @@ function AdminSidebar() {
         {NAV_LINKS.map(({ href, label, icon: Icon }) => {
           // Un lien est actif si l'URL courante correspond exactement ou commence par href
           const isActive =
-            href === '/admin'
-              ? pathname === '/admin'
+            href === "/admin"
+              ? pathname === "/admin"
               : pathname.startsWith(href);
 
           return (
@@ -73,15 +73,17 @@ function AdminSidebar() {
               href={href}
               className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors"
               style={{
-                backgroundColor: isActive ? '#FFF3E0' : 'transparent',
-                color:           isActive ? '#111111' : '#444444',
-                borderLeft:      isActive ? '4px solid #F2700B' : '4px solid transparent',
-                fontWeight:      isActive ? '700' : '500',
+                backgroundColor: isActive ? "#FFF3E0" : "transparent",
+                color: isActive ? "#111111" : "#444444",
+                borderLeft: isActive
+                  ? "4px solid #F2700B"
+                  : "4px solid transparent",
+                fontWeight: isActive ? "700" : "500",
               }}
             >
               <Icon
                 size={18}
-                style={{ color: isActive ? '#F2700B' : '#666666' }}
+                style={{ color: isActive ? "#F2700B" : "#666666" }}
               />
               {label}
             </Link>
@@ -95,12 +97,14 @@ function AdminSidebar() {
         <div className="flex items-center gap-3 px-2 py-2 mb-2">
           <div
             className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
-            style={{ backgroundColor: '#F2700B' }}
+            style={{ backgroundColor: "#F2700B" }}
           >
             A
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-sm font-bold text-[#111111] truncate">Admin</span>
+            <span className="text-sm font-bold text-[#111111] truncate">
+              Admin
+            </span>
             <span className="text-xs text-[#666666]">Administrateur</span>
           </div>
         </div>
@@ -124,7 +128,7 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const router  = useRouter();
+  const router = useRouter();
 
   /**
    * isChecking : true pendant la vérification du rôle.
@@ -138,13 +142,13 @@ export default function AdminLayout({
    * et qu'il a le rôle ADMIN avant d'afficher les pages enfants.
    */
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
-    const profileRaw = localStorage.getItem('user_profile');
+    const profileRaw = localStorage.getItem("user_profile");
 
     // Si aucun profil en localStorage → non connecté → redirection login
     if (!profileRaw) {
-      router.replace('/login');
+      router.replace("/login");
       return; // on ne débloque pas l'affichage
     }
 
@@ -153,15 +157,15 @@ export default function AdminLayout({
       const role = profile?.typeUtilisateur?.libelle;
 
       // Vérifie que le rôle est bien ADMIN sans créer de boucle avec l'espace vendeur.
-      if (role === 'VENDEUR') {
-        router.replace('/dashboard');
+      if (role === "VENDEUR") {
+        router.replace("/dashboard");
         return;
       }
 
-      if (role !== 'ADMIN') {
-        localStorage.removeItem('user_profile');
-        localStorage.removeItem('user_id');
-        router.replace('/login');
+      if (role !== "ADMIN") {
+        localStorage.removeItem("user_profile");
+        localStorage.removeItem("user_id");
+        router.replace("/login");
         return;
       }
 
@@ -170,9 +174,9 @@ export default function AdminLayout({
       setIsChecking(false);
     } catch {
       // JSON invalide → on efface et on redirige
-      localStorage.removeItem('user_profile');
-      localStorage.removeItem('user_id');
-      router.replace('/login');
+      localStorage.removeItem("user_profile");
+      localStorage.removeItem("user_id");
+      router.replace("/login");
     }
   }, [router]);
 
@@ -182,17 +186,21 @@ export default function AdminLayout({
     return (
       <div
         className="flex h-screen items-center justify-center"
-        style={{ backgroundColor: '#F8F5EE' }}
+        style={{ backgroundColor: "#F8F5EE" }}
       >
-        <p className="text-sm text-[#F2700B] animate-pulse">Vérification en cours…</p>
+        <p className="text-sm text-[#F2700B] animate-pulse">
+          Vérification en cours…
+        </p>
       </div>
     );
   }
 
   return (
     // Conteneur plein écran : sidebar à gauche, contenu à droite
-    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: '#F8F5EE' }}>
-
+    <div
+      className="flex h-screen overflow-hidden"
+      style={{ backgroundColor: "#F8F5EE" }}
+    >
       {/* Sidebar fixe à gauche */}
       <AdminSidebar />
 
@@ -201,7 +209,7 @@ export default function AdminLayout({
         {/* En-tête de la zone admin */}
         <header
           className="h-16 border-b border-[#d9cdb8] flex items-center px-8 shrink-0"
-          style={{ backgroundColor: '#F0E9D9' }}
+          style={{ backgroundColor: "#F0E9D9" }}
         >
           <h1 className="text-lg font-bold text-[#111111]">
             Espace Administration — Assigamé
@@ -209,7 +217,10 @@ export default function AdminLayout({
         </header>
 
         {/* Contenu scrollable de la page courante */}
-        <div className="flex-1 overflow-auto p-8" style={{ backgroundColor: '#F8F5EE' }}>
+        <div
+          className="flex-1 overflow-auto p-8"
+          style={{ backgroundColor: "#F8F5EE" }}
+        >
           {children}
         </div>
       </main>

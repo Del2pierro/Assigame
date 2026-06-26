@@ -3,18 +3,145 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRegister } from '../hooks';
-import { UserPlus, User, Mail, Lock, Phone, MapPin, AlertCircle, CheckCircle2 } from 'lucide-react';
 
+// ─── Assets: Carte Togo (base64 PNG) ─────────────────────────────────────────
+const TOGO_MAP_B64 =
+  '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';
+
+// ─── Assets: Drapeau du Togo (SVG inline) ────────────────────────────────────
+const FlagSVG = () => (
+  <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="300" height="200" fill="#EDE8DC" />
+    <rect y="0" width="300" height="40" fill="#c8203a" />
+    <rect y="40" width="300" height="40" fill="#f3c517" />
+    <rect y="80" width="300" height="40" fill="#1f6b4a" />
+    <rect y="120" width="300" height="40" fill="#f3c517" />
+    <rect y="160" width="300" height="40" fill="#1f6b4a" />
+    <rect x="0" y="0" width="120" height="120" fill="#c8203a" />
+    <path d="M60 30 l8 24h25l-20 16 8 24-21-15-21 15 8-24-20-16h25z" fill="#EDE8DC" />
+  </svg>
+);
+
+// ─── Icônes SVG inline ────────────────────────────────────────────────────────
+const IconUser = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4 20c0-4 3.5-7 8-7s8 3 8 7" />
+  </svg>
+);
+
+const IconMail = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M3 5h18v14H3z" />
+    <path d="M3 6l9 7 9-7" />
+  </svg>
+);
+
+const IconLock = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <rect x="5" y="11" width="14" height="9" rx="2" />
+    <path d="M8 11V7a4 4 0 018 0v4" />
+  </svg>
+);
+
+const IconEye = ({ crossed }: { crossed?: boolean }) => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
+    <circle cx="12" cy="12" r="3" />
+    {crossed && <line x1="3" y1="3" x2="21" y2="21" />}
+  </svg>
+);
+
+// ─── Décorations de fond (réutilisées depuis LoginForm) ───────────────────────
+const BackgroundDecorations = () => (
+  <>
+    {/* Drapeaux de fond */}
+    <div style={{ position: 'absolute', top: 60, left: 60, width: 130, transform: 'rotate(-4deg)', opacity: 0.9, zIndex: 0 }}>
+      <FlagSVG />
+    </div>
+    <div style={{ position: 'absolute', top: 90, right: 70, width: 120, transform: 'rotate(5deg)', opacity: 0.9, zIndex: 0 }}>
+      <FlagSVG />
+    </div>
+    <div style={{ position: 'absolute', bottom: 60, left: 60, width: 130, transform: 'rotate(3deg)', opacity: 0.9, zIndex: 0 }}>
+      <FlagSVG />
+    </div>
+
+    {/* Sac de courses */}
+    <div style={{ position: 'absolute', top: 170, left: 90, width: 90, height: 90, transform: 'rotate(-6deg)', opacity: 0.5, color: '#caa86a', zIndex: 0 }}>
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2.5" width="100%" height="100%">
+        <path d="M14 22h36l-3 34a4 4 0 01-4 4H21a4 4 0 01-4-4l-3-34z" />
+        <path d="M22 22v-4a10 10 0 0120 0v4" />
+      </svg>
+    </div>
+
+    {/* Caddie */}
+    <div style={{ position: 'absolute', bottom: 140, left: 90, width: 110, height: 110, transform: 'rotate(4deg)', opacity: 0.5, color: '#caa86a', zIndex: 0 }}>
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2.5" width="100%" height="100%">
+        <path d="M6 8h6l6 30h32l6-20H16" />
+        <circle cx="22" cy="50" r="4" />
+        <circle cx="42" cy="50" r="4" />
+      </svg>
+    </div>
+
+    {/* Billets */}
+    {([
+      { top: 140, right: 110, bottom: undefined, rot: 18 },
+      { top: 230, right: 60, bottom: undefined, rot: -10 },
+      { top: undefined, right: 120, bottom: 160, rot: 12 },
+    ] as Array<{ top?: number; right?: number; bottom?: number; rot: number }>).map((pos, i) => (
+      <div
+        key={i}
+        style={{
+          position: 'absolute',
+          top: pos.top,
+          right: pos.right,
+          bottom: pos.bottom,
+          width: 88,
+          height: 58,
+          transform: `rotate(${pos.rot}deg)`,
+          opacity: 0.5,
+          color: '#caa86a',
+          zIndex: 0,
+        }}
+      >
+        <svg viewBox="0 0 90 60" fill="none" stroke="currentColor" strokeWidth="2.5" width="100%" height="100%">
+          <rect x="3" y="3" width="84" height="54" rx="6" />
+          <circle cx="45" cy="30" r="14" />
+          <text x="45" y="35" fontSize="14" textAnchor="middle" fill="currentColor" stroke="none">$</text>
+        </svg>
+      </div>
+    ))}
+
+    {/* Carte du Togo */}
+    <div style={{ position: 'absolute', top: '50%', left: '18%', transform: 'translate(-50%, -50%)', width: 420, height: 360, overflow: 'hidden', zIndex: 0, opacity: 0.55, pointerEvents: 'none' }}>
+      <img src={`data:image/png;base64,${TOGO_MAP_B64}`} alt="" style={{ width: '100%', display: 'block' }} />
+    </div>
+
+    {/* Badge drapeau bas-droite */}
+    <div style={{ position: 'absolute', bottom: 36, right: 46, width: 130, zIndex: 1 }}>
+      <div style={{ boxShadow: '0 4px 10px rgba(0,0,0,0.2)', borderRadius: 4, overflow: 'hidden' }}>
+        <FlagSVG />
+      </div>
+    </div>
+  </>
+);
+
+// ─── Composant principal ──────────────────────────────────────────────────────
 export const RegisterForm: React.FC = () => {
   const { handleRegister, formError, successMessage, isSubmitting, clearFormState } = useRegister();
-  
+
   const [nom, setNom] = useState('');
   const [prenom, setPrenom] = useState('');
   const [email, setEmail] = useState('');
   const [login, setLogin] = useState('');
   const [motDePasse, setMotDePasse] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [telephone, setTelephone] = useState('');
   const [adresse, setAdresse] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [confirmError, setConfirmError] = useState<string | null>(null);
+  const [acceptTerms, setAcceptTerms] = useState(false);
 
   // Nettoyage de l'état au démontage
   useEffect(() => {
@@ -23,6 +150,14 @@ export const RegisterForm: React.FC = () => {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setConfirmError(null);
+
+    // Validation locale : les mots de passe doivent correspondre
+    if (motDePasse !== confirmPassword) {
+      setConfirmError('Les mots de passe ne correspondent pas.');
+      return;
+    }
+
     handleRegister({
       nom,
       prenom,
@@ -34,197 +169,305 @@ export const RegisterForm: React.FC = () => {
     });
   };
 
+  // ─── Styles partagés ─────────────────────────────────────────────────────
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '14px 44px',
+    border: '1px solid #d8cfb8',
+    borderRadius: 30,
+    fontSize: 14,
+    fontFamily: 'Arial, Helvetica, sans-serif',
+    background: '#fff',
+    color: '#444',
+    outline: 'none',
+    boxSizing: 'border-box',
+  };
+
+  const iconLeftStyle: React.CSSProperties = {
+    position: 'absolute',
+    left: 16,
+    top: '50%',
+    transform: 'translateY(-50%)',
+    color: '#a9a39a',
+  };
+
+  const eyeBtnStyle: React.CSSProperties = {
+    position: 'absolute',
+    right: 16,
+    top: '50%',
+    transform: 'translateY(-50%)',
+    color: '#a9a39a',
+    cursor: 'pointer',
+    background: 'none',
+    border: 'none',
+    padding: 0,
+    display: 'flex',
+  };
+
   return (
-    <div className="w-full max-w-lg p-8 rounded-3xl border border-[#d9cdb8]/60 bg-white/80 backdrop-blur-xl shadow-xl shadow-stone-100">
-      <div className="flex flex-col items-center mb-8">
-        <div className="h-12 w-12 rounded-2xl flex items-center justify-center bg-gradient-to-r from-[#F2700B] to-[#e05a00] text-white shadow-lg shadow-orange-500/20 mb-4">
-          <UserPlus size={22} />
-        </div>
-        <h2 className="text-2xl font-black text-zinc-900 tracking-tight text-center">
-          Devenir Vendeur
-        </h2>
-        <p className="text-sm text-zinc-500 mt-1 text-center">
-          Inscrivez-vous pour commencer à vendre vos articles
-        </p>
-      </div>
+    <div
+      style={{
+        position: 'relative',
+        minHeight: '100vh',
+        width: '100%',
+        background: '#F8F5EE',
+        fontFamily: "Georgia, 'Times New Roman', serif",
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+        paddingTop: 32,
+        paddingBottom: 32,
+      }}
+    >
+      <BackgroundDecorations />
 
-      {successMessage && (
-        <div className="mb-6 flex items-start gap-3 rounded-2xl bg-green-50 border border-green-200/60 p-4 text-sm text-green-700 animate-fadeIn">
-          <CheckCircle2 size={18} className="shrink-0 mt-0.5" />
-          <span>{successMessage}</span>
+      {/* Carte d'inscription */}
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 2,
+          background: '#EDE8DC',
+          borderRadius: 28,
+          padding: '48px 56px 40px',
+          width: 460,
+          maxWidth: '95vw',
+          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.18)',
+          textAlign: 'center',
+        }}
+      >
+        {/* Logo ASSIGAMÉ */}
+        <div style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontWeight: 800, fontSize: 26, letterSpacing: 1, color: '#1a1a1a', marginTop: 6 }}>
+          ASSIGAMÉ
         </div>
-      )}
 
-      {formError && (
-        <div className="mb-6 flex items-start gap-3 rounded-2xl bg-red-50 border border-red-200/60 p-4 text-sm text-red-700 animate-fadeIn">
-          <AlertCircle size={18} className="shrink-0 mt-0.5" />
-          <span>{formError}</span>
+        {/* Bandelettes couleurs Togo */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 4, marginTop: 8, marginBottom: 28 }}>
+          {['#c8203a', '#f3c517', '#1f6b4a', '#F2700B'].map((c, i) => (
+            <span key={i} style={{ width: 22, height: 4, borderRadius: 2, background: c, display: 'inline-block' }} />
+          ))}
         </div>
-      )}
 
-      <form onSubmit={onSubmit} className="space-y-4">
-        {/* Nom & Prénom */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-[13px] font-semibold text-zinc-700 mb-1.5">
-              Nom
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
-                <User size={15} />
-              </div>
-              <input
-                type="text"
-                required
-                value={nom}
-                onChange={(e) => setNom(e.target.value)}
-                placeholder="Ex: Kouamé"
-                className="w-full rounded-xl bg-white border border-[#d9cdb8]/60 py-2.5 pl-10 pr-4 text-[13px] text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-4 focus:ring-[#F2700B]/10 focus:border-[#F2700B] transition-all duration-200"
-              />
-            </div>
+        <h1 style={{ fontSize: 30, margin: '0 0 8px', color: '#1a1a1a' }}>Créer un compte</h1>
+        <div style={{ fontFamily: 'Arial, Helvetica, sans-serif', color: '#7a7670', fontSize: 14, marginBottom: 26 }}>
+          Inscrivez-vous pour commencer à vendre
+        </div>
+
+        {/* Message de succès */}
+        {successMessage && (
+          <div style={{ marginBottom: 18, padding: '12px 16px', background: '#f0fff4', border: '1px solid #b2f5cc', borderRadius: 12, color: '#276749', fontSize: 13, fontFamily: 'Arial, Helvetica, sans-serif', textAlign: 'left' }}>
+            {successMessage}
           </div>
+        )}
 
-          <div>
-            <label className="block text-[13px] font-semibold text-zinc-700 mb-1.5">
-              Prénom
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
-                <User size={15} />
-              </div>
-              <input
-                type="text"
-                required
-                value={prenom}
-                onChange={(e) => setPrenom(e.target.value)}
-                placeholder="Ex: Koffi"
-                className="w-full rounded-xl bg-white border border-[#d9cdb8]/60 py-2.5 pl-10 pr-4 text-[13px] text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-4 focus:ring-[#F2700B]/10 focus:border-[#F2700B] transition-all duration-200"
-              />
-            </div>
+        {/* Message d'erreur API */}
+        {formError && (
+          <div style={{ marginBottom: 18, padding: '12px 16px', background: '#fff0f0', border: '1px solid #f5c6c6', borderRadius: 12, color: '#c0392b', fontSize: 13, fontFamily: 'Arial, Helvetica, sans-serif', textAlign: 'left' }}>
+            {formError}
           </div>
-        </div>
+        )}
 
-        {/* Email */}
-        <div>
-          <label className="block text-[13px] font-semibold text-zinc-700 mb-1.5">
-            Adresse Email
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
-              <Mail size={15} />
-            </div>
+        {/* Erreur de confirmation de mot de passe */}
+        {confirmError && (
+          <div style={{ marginBottom: 18, padding: '12px 16px', background: '#fff0f0', border: '1px solid #f5c6c6', borderRadius: 12, color: '#c0392b', fontSize: 13, fontFamily: 'Arial, Helvetica, sans-serif', textAlign: 'left' }}>
+            {confirmError}
+          </div>
+        )}
+
+        <form onSubmit={onSubmit}>
+          {/* Nom complet */}
+          <div style={{ position: 'relative', marginBottom: 18, textAlign: 'left' }}>
+            <span style={iconLeftStyle}><IconUser /></span>
             <input
+              id="register-nom"
+              type="text"
+              placeholder="Nom complet"
+              required
+              value={nom}
+              onChange={(e) => setNom(e.target.value)}
+              style={inputStyle}
+            />
+          </div>
+
+          {/* Prénom */}
+          <div style={{ position: 'relative', marginBottom: 18, textAlign: 'left' }}>
+            <span style={iconLeftStyle}><IconUser /></span>
+            <input
+              id="register-prenom"
+              type="text"
+              placeholder="Prénom"
+              required
+              value={prenom}
+              onChange={(e) => setPrenom(e.target.value)}
+              style={inputStyle}
+            />
+          </div>
+
+          {/* Email */}
+          <div style={{ position: 'relative', marginBottom: 18, textAlign: 'left' }}>
+            <span style={iconLeftStyle}><IconMail /></span>
+            <input
+              id="register-email"
               type="email"
+              placeholder="Adresse e-mail"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="adresse@exemple.com"
-              className="w-full rounded-xl bg-white border border-[#d9cdb8]/60 py-2.5 pl-10 pr-4 text-[13px] text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-4 focus:ring-[#F2700B]/10 focus:border-[#F2700B] transition-all duration-200"
+              style={inputStyle}
             />
           </div>
-        </div>
 
-        {/* Login & Mot de passe */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-[13px] font-semibold text-zinc-700 mb-1.5">
-              Nom d&apos;utilisateur (Pseudo)
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
-                <User size={15} />
-              </div>
+          {/* Login (pseudo) */}
+          <div style={{ position: 'relative', marginBottom: 18, textAlign: 'left' }}>
+            <span style={iconLeftStyle}><IconUser /></span>
+            <input
+              id="register-login"
+              type="text"
+              placeholder="Nom d'utilisateur (pseudo)"
+              required
+              value={login}
+              onChange={(e) => setLogin(e.target.value)}
+              style={inputStyle}
+            />
+          </div>
+
+          {/* Mot de passe */}
+          <div style={{ position: 'relative', marginBottom: 18, textAlign: 'left' }}>
+            <span style={iconLeftStyle}><IconLock /></span>
+            <input
+              id="register-password"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Mot de passe"
+              required
+              value={motDePasse}
+              onChange={(e) => setMotDePasse(e.target.value)}
+              style={inputStyle}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((s) => !s)}
+              style={eyeBtnStyle}
+              aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+            >
+              <IconEye crossed={showPassword} />
+            </button>
+          </div>
+
+          {/* Confirmer le mot de passe */}
+          <div style={{ position: 'relative', marginBottom: 18, textAlign: 'left' }}>
+            <span style={iconLeftStyle}><IconLock /></span>
+            <input
+              id="register-confirm-password"
+              type={showConfirm ? 'text' : 'password'}
+              placeholder="Confirmer le mot de passe"
+              required
+              value={confirmPassword}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                if (confirmError) setConfirmError(null);
+              }}
+              style={inputStyle}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirm((s) => !s)}
+              style={eyeBtnStyle}
+              aria-label={showConfirm ? 'Masquer la confirmation' : 'Afficher la confirmation'}
+            >
+              <IconEye crossed={showConfirm} />
+            </button>
+          </div>
+
+          {/* Téléphone (optionnel) */}
+          <div style={{ position: 'relative', marginBottom: 18, textAlign: 'left' }}>
+            <span style={iconLeftStyle}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 013.07 5.18 2 2 0 015.05 3h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L9.09 10.9a16 16 0 006.01 6.01l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 17z" />
+              </svg>
+            </span>
+            <input
+              id="register-telephone"
+              type="tel"
+              placeholder="Téléphone (optionnel)"
+              value={telephone}
+              onChange={(e) => setTelephone(e.target.value)}
+              style={inputStyle}
+            />
+          </div>
+
+          {/* Adresse (optionnelle) */}
+          <div style={{ position: 'relative', marginBottom: 18, textAlign: 'left' }}>
+            <span style={iconLeftStyle}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+            </span>
+            <input
+              id="register-adresse"
+              type="text"
+              placeholder="Adresse (optionnelle)"
+              value={adresse}
+              onChange={(e) => setAdresse(e.target.value)}
+              style={inputStyle}
+            />
+          </div>
+
+          {/* Conditions d'utilisation */}
+          <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', fontFamily: 'Arial, Helvetica, sans-serif', fontSize: 13, color: '#444', margin: '6px 0 22px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
               <input
-                type="text"
+                type="checkbox"
                 required
-                value={login}
-                onChange={(e) => setLogin(e.target.value)}
-                placeholder="Ex: koffi_seller"
-                className="w-full rounded-xl bg-white border border-[#d9cdb8]/60 py-2.5 pl-10 pr-4 text-[13px] text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-4 focus:ring-[#F2700B]/10 focus:border-[#F2700B] transition-all duration-200"
+                checked={acceptTerms}
+                onChange={(e) => setAcceptTerms(e.target.checked)}
               />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-[13px] font-semibold text-zinc-700 mb-1.5">
-              Mot de passe
+              J&apos;accepte les conditions d&apos;utilisation
             </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
-                <Lock size={15} />
-              </div>
-              <input
-                type="password"
-                required
-                value={motDePasse}
-                onChange={(e) => setMotDePasse(e.target.value)}
-                placeholder="Min 6 caractères"
-                className="w-full rounded-xl bg-white border border-[#d9cdb8]/60 py-2.5 pl-10 pr-4 text-[13px] text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-4 focus:ring-[#F2700B]/10 focus:border-[#F2700B] transition-all duration-200"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Téléphone & Adresse */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-[13px] font-semibold text-zinc-700 mb-1.5">
-              Téléphone <span className="text-zinc-400 font-normal">(Optionnel)</span>
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
-                <Phone size={15} />
-              </div>
-              <input
-                type="tel"
-                value={telephone}
-                onChange={(e) => setTelephone(e.target.value)}
-                placeholder="+228 90 00 00 00"
-                className="w-full rounded-xl bg-white border border-[#d9cdb8]/60 py-2.5 pl-10 pr-4 text-[13px] text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-4 focus:ring-[#F2700B]/10 focus:border-[#F2700B] transition-all duration-200"
-              />
-            </div>
           </div>
 
-          <div>
-            <label className="block text-[13px] font-semibold text-zinc-700 mb-1.5">
-              Adresse <span className="text-zinc-400 font-normal">(Optionnelle)</span>
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
-                <MapPin size={15} />
-              </div>
-              <input
-                type="text"
-                value={adresse}
-                onChange={(e) => setAdresse(e.target.value)}
-                placeholder="Ex: Quartier Deckon, Lomé"
-                className="w-full rounded-xl bg-white border border-[#d9cdb8]/60 py-2.5 pl-10 pr-4 text-[13px] text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-4 focus:ring-[#F2700B]/10 focus:border-[#F2700B] transition-all duration-200"
-              />
-            </div>
-          </div>
-        </div>
+          {/* Bouton inscription */}
+          <button
+            id="register-submit"
+            type="submit"
+            disabled={isSubmitting}
+            style={{
+              width: '100%',
+              background: isSubmitting ? '#ccc' : '#F2700B',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 30,
+              padding: 15,
+              fontSize: 16,
+              fontWeight: 700,
+              fontFamily: 'Arial, Helvetica, sans-serif',
+              cursor: isSubmitting ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              transition: 'background 0.2s ease',
+            }}
+          >
+            {isSubmitting ? (
+              <span style={{ display: 'inline-block', width: 18, height: 18, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+            ) : (
+              "S'inscrire"
+            )}
+          </button>
+        </form>
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#F2700B] to-[#e05a00] py-3.5 text-[14px] font-bold text-white shadow-lg shadow-orange-500/10 hover:shadow-orange-500/25 active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:pointer-events-none mt-2"
-        >
-          {isSubmitting ? (
-            <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          ) : (
-            "S'inscrire"
-          )}
-        </button>
-      </form>
-
-      <div className="mt-8 text-center border-t border-[#d9cdb8]/30 pt-6">
-        <p className="text-[13px] text-zinc-500">
-          Déjà inscrit ?{' '}
-          <Link href="/login" className="font-bold text-[#F2700B] hover:underline">
+        {/* Lien vers la connexion */}
+        <div style={{ marginTop: 22, fontFamily: 'Arial, Helvetica, sans-serif', fontSize: 13, color: '#444' }}>
+          Vous avez déjà un compte ?{' '}
+          <Link href="/login" style={{ color: '#F2700B', textDecoration: 'none', fontWeight: 600 }}>
             Se connecter
           </Link>
-        </p>
+        </div>
       </div>
+
+      {/* Animation spin */}
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 };

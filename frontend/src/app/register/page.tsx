@@ -25,9 +25,5 @@ export default function RegisterPage() {
 
   if (isAuthenticated) return null;
 
-  return (
-    <main className="min-h-screen bg-[#F8F5EE] flex items-center justify-center p-4">
-      <RegisterForm />
-    </main>
-  );
+  return <RegisterForm />;
 }

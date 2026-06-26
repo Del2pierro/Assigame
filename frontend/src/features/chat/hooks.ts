@@ -67,7 +67,6 @@ export const useChat = () => {
     }
   }, []);
 
-  /** Acheteur clique sur « Contacter le vendeur » */
   const startNegotiation = useCallback(async (productId: number, sellerId: number) => {
     try {
       setIsLoading(true);
@@ -81,7 +80,11 @@ export const useChat = () => {
       state.setSidebarOpen(true);
     } catch (err) {
       console.error('Failed to start negotiation', err);
-      setChatError(err instanceof Error ? err.message : 'Impossible de démarrer la conversation');
+      const msg = err instanceof Error ? err.message : 'Impossible de démarrer la conversation';
+      setChatError(msg);
+      if (typeof window !== 'undefined') {
+        window.alert(`Erreur Chat: ${msg}`);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -112,7 +115,7 @@ export const useChat = () => {
     };
   }, [activeConversationId, wsStatus]);
 
-  const sendMessage = useCallback((content: string) => {
+  const sendMessage = useCallback((content: string, asRole?: SenderType) => {
     const { activeConversationId: convId, conversations } = useChatStore.getState();
     if (!convId || !content.trim()) return;
 
@@ -122,12 +125,21 @@ export const useChat = () => {
     let senderId: string;
     let senderType: SenderType;
 
-    if (sellerUserId && conv && conv.sellerId === Number(sellerUserId)) {
-      senderId = sellerUserId;
+    if (asRole === 'SELLER') {
+      senderId = sellerUserId || String(conv?.sellerId);
       senderType = 'SELLER';
-    } else {
+    } else if (asRole === 'BUYER') {
       senderId = conv?.buyerId ?? ensureBuyerId();
       senderType = 'BUYER';
+    } else {
+      // Fallback
+      if (sellerUserId && conv && conv.sellerId === Number(sellerUserId)) {
+        senderId = sellerUserId;
+        senderType = 'SELLER';
+      } else {
+        senderId = conv?.buyerId ?? ensureBuyerId();
+        senderType = 'BUYER';
+      }
     }
 
     const payload: StompSendPayload = {
