@@ -159,12 +159,12 @@ export default function DashboardLayout({
       const parsed = JSON.parse(profileRaw) as Utilisateur;
       const role = parsed?.typeUtilisateur?.libelle;
 
-      if (role === "ADMIN") {
+      if (role === "admin") {
         router.replace("/admin");
         return;
       }
 
-      if (role !== "VENDEUR") {
+      if (role !== "vendeur") {
         localStorage.removeItem("user_profile");
         localStorage.removeItem("user_id");
         router.replace("/login");
@@ -183,7 +183,10 @@ export default function DashboardLayout({
 
   if (isChecking) {
     return (
-      <div className="flex h-screen flex-col" style={{ backgroundColor: "#F8F5EE" }}>
+      <div
+        className="flex h-screen flex-col"
+        style={{ backgroundColor: "#F8F5EE" }}
+      >
         <div
           className="flex h-16 items-center border-b border-[#d9cdb8] px-6"
           style={{ backgroundColor: "#F0E9D9" }}
@@ -258,9 +261,7 @@ export default function DashboardLayout({
           )}
         </header>
 
-        <div className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
-          {children}
-        </div>
+        <div className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">{children}</div>
       </main>
     </div>
   );

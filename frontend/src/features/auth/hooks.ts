@@ -24,7 +24,13 @@ export const useLogin = () => {
       loginSchema.parse(payload);
 
       // Appel API
-      const user = await loginUser(payload);
+      const response = await loginUser(payload);
+      const { token, user } = response;
+
+      // Sauvegarde du token JWT
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('jwt_token', token);
+      }
 
       // Enregistrement global de la session
       setUser(user);

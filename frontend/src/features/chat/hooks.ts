@@ -47,6 +47,7 @@ export const useChat = () => {
   const conversations = useChatStore((s) => s.conversations);
   const messages = useChatStore((s) => s.messages);
   const wsStatus = useChatStore((s) => s.wsStatus);
+  const pendingConversation = useChatStore((s) => s.pendingConversation);
   const setSidebarOpen = useChatStore((s) => s.setSidebarOpen);
   const setActiveConversation = useChatStore((s) => s.setActiveConversation);
 
@@ -65,6 +66,13 @@ export const useChat = () => {
     } finally {
       setIsLoading(false);
     }
+  }, []);
+
+  const openChatForProduct = useCallback((productId: number, sellerId: number) => {
+    const state = useChatStore.getState();
+    state.setPendingConversation({ productId, sellerId });
+    state.setActiveConversation(null);
+    state.setSidebarOpen(true);
   }, []);
 
   const startNegotiation = useCallback(async (productId: number, sellerId: number) => {
@@ -152,18 +160,56 @@ export const useChat = () => {
     stompClient.publish('/app/chat.send', payload);
   }, []);
 
+  const sendMessageWithConversation = useCallback(async (content: string, productId: number, sellerId: number) => {
+    if (!content.trim()) return;
+
+    try {
+      setIsLoading(true);
+      setChatError(null);
+
+      // Create conversation first
+      const buyerId = ensureBuyerId();
+      const payload: CreateConversationPayload = { buyerId, sellerId, productId };
+      const conversation = await chatApi.initiateConversation(payload);
+
+      const state = useChatStore.getState();
+      state.addConversation(conversation);
+      state.setActiveConversation(conversation.idConversation);
+      state.setPendingConversation(null);
+
+      // Send the message
+      const stompPayload: StompSendPayload = {
+        conversationId: conversation.idConversation,
+        senderId: buyerId,
+        senderType: 'BUYER',
+        content: content.trim(),
+      };
+
+      stompClient.publish('/app/chat.send', stompPayload);
+    } catch (err) {
+      console.error('Failed to create conversation and send message', err);
+      const msg = err instanceof Error ? err.message : 'Impossible d\'envoyer le message';
+      setChatError(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   return {
     isSidebarOpen,
     activeConversationId,
     conversations,
     messages,
     wsStatus,
+    pendingConversation,
     setSidebarOpen,
     setActiveConversation,
     isLoading,
     chatError,
     loadConversations,
+    openChatForProduct,
     startNegotiation,
     sendMessage,
+    sendMessageWithConversation,
   };
 };

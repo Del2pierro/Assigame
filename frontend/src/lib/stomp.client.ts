@@ -1,14 +1,18 @@
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 
 // Configuration de base pour l'URL WebSocket
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8081/ws';
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8080/ws';
 
 class StompClientService {
   private client: Client | null = null;
   private subscriptions: Map<string, StompSubscription> = new Map();
 
   connect(userId: string, onConnect?: () => void, onError?: (err: any) => void) {
+    console.log('[STOMP] Tentative de connexion WebSocket vers:', WS_URL);
+    console.log('[STOMP] User ID:', userId);
+
     if (this.client && this.client.active) {
+      console.log('[STOMP] Client déjà actif');
       return;
     }
 
@@ -28,7 +32,7 @@ class StompClientService {
     });
 
     this.client.onConnect = () => {
-      console.log('[STOMP] Connected');
+      console.log('[STOMP] Connected successfully');
       if (onConnect) onConnect();
     };
 
@@ -40,10 +44,13 @@ class StompClientService {
 
     this.client.onWebSocketError = (event) => {
       console.error('[STOMP] WebSocket error: ', event);
+      console.error('[STOMP] Error type:', event.type);
+      console.error('[STOMP] Error message:', event.message);
       if (onError) onError(event);
     };
 
     this.client.activate();
+    console.log('[STOMP] Client activation initiated');
   }
 
   disconnect() {

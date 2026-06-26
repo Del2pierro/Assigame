@@ -33,9 +33,11 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   // Sécurité : localStorage n'existe que côté navigateur
   if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('jwt_token');
     const userId  = localStorage.getItem('user_id');
     const guestId = localStorage.getItem('guest_id');
 
+    if (token) config.headers['Authorization'] = `Bearer ${token}`;
     if (userId)  config.headers['X-User-Id']  = userId;
     if (guestId) config.headers['X-Guest-Id'] = guestId;
   }

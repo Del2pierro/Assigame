@@ -106,7 +106,7 @@ const BackgroundDecorations = () => (
     ))}
 
     {/* Carte du Togo */}
-    <div style={{ position: 'absolute', top: '50%', left: '18%', transform: 'translate(-50%, -50%)', width: 420, height: 360, overflow: 'hidden', zIndex: 0, opacity: 0.55, pointerEvents: 'none' }}>
+    <div style={{ position: 'absolute', top: '50%', left: '18%', transform: 'translate(-50%, -50%)', width: 420, height: 360, overflow: 'hidden', zIndex: 1, opacity: 0.55, pointerEvents: 'none' }}>
       <img src={`data:image/png;base64,${TOGO_MAP_B64}`} alt="" style={{ width: '100%', display: 'block' }} />
     </div>
 

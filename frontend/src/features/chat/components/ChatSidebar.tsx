@@ -1,12 +1,16 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { X, Loader2 } from "lucide-react";
+import { X, Loader2, MessageCircle } from "lucide-react";
 import { useChat, useStompConnection } from "../hooks";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
 
-export const ChatSidebar: React.FC = () => {
+interface ChatSidebarProps {
+  showOverlay?: boolean;
+}
+
+export const ChatSidebar: React.FC<ChatSidebarProps> = ({ showOverlay = true }) => {
   useStompConnection();
 
   const {
@@ -16,8 +20,10 @@ export const ChatSidebar: React.FC = () => {
     messages,
     wsStatus,
     sendMessage,
+    sendMessageWithConversation,
     isLoading,
     chatError,
+    pendingConversation,
   } = useChat();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -40,13 +46,25 @@ export const ChatSidebar: React.FC = () => {
     ? messages[activeConversationId] || []
     : [];
 
+  const isPending = !activeConversationId && pendingConversation;
+
+  const handleSendMessage = (content: string) => {
+    if (isPending && pendingConversation) {
+      sendMessageWithConversation(content, pendingConversation.productId, pendingConversation.sellerId);
+    } else {
+      sendMessage(content, "BUYER");
+    }
+  };
+
   return (
     <>
-      {/* Overlay */}
-      <div
-        className="fixed inset-0 z-[60] bg-black/20 backdrop-blur-sm transition-opacity"
-        onClick={() => setSidebarOpen(false)}
-      />
+      {/* Overlay - only shown when showOverlay is true */}
+      {showOverlay && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/20 backdrop-blur-sm transition-opacity"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
       {/* Sidebar */}
       <div className="fixed inset-y-0 right-0 z-[70] flex w-full flex-col bg-[#f0e9d9] shadow-2xl sm:w-[400px] transition-transform duration-300 transform translate-x-0">
@@ -86,6 +104,14 @@ export const ChatSidebar: React.FC = () => {
             <div className="flex h-full items-center justify-center">
               <Loader2 className="h-6 w-6 animate-spin text-[#f2700b]" />
             </div>
+          ) : isPending ? (
+            <div className="flex h-full flex-col items-center justify-center text-center text-gray-500">
+              <div className="h-12 w-12 rounded-full bg-[#f2700b]/10 flex items-center justify-center mb-3">
+                <MessageCircle size={24} className="text-[#f2700b]" />
+              </div>
+              <p className="text-sm font-medium">Commencez la conversation</p>
+              <p className="text-xs mt-1">Envoyez votre premier message au vendeur</p>
+            </div>
           ) : activeMessages.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center text-center text-gray-500">
               <p className="text-sm">Aucun message pour le moment.</p>
@@ -106,8 +132,8 @@ export const ChatSidebar: React.FC = () => {
         {/* Input */}
         <div className="bg-white/50 p-2 backdrop-blur-md">
           <ChatInput
-            onSendMessage={(content) => sendMessage(content, "BUYER")}
-            disabled={wsStatus !== "CONNECTED" || !activeConversationId}
+            onSendMessage={handleSendMessage}
+            disabled={wsStatus !== "CONNECTED"}
           />
         </div>
       </div>

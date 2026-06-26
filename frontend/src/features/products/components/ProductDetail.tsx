@@ -1,20 +1,33 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState, useRef } from 'react';
-import { X, Package, MapPin, Calendar, MessageCircle, Loader2, AlertCircle } from 'lucide-react';
-import { useChat } from '@/features/chat/hooks';
-import { productApi } from '../api';
-import { getSellerIdFromProduit } from '@/lib/product.mapper';
-import { getSellerDisplayName, getSellerInitials } from '@/lib/seller.utils';
-import { Produit } from '@/types/models.types';
+import React, { useEffect, useState, useRef } from "react";
+import {
+  X,
+  Package,
+  MapPin,
+  Calendar,
+  MessageCircle,
+  Loader2,
+  AlertCircle,
+} from "lucide-react";
+import { useChat } from "@/features/chat/hooks";
+import { productApi } from "../api";
+import { getSellerIdFromProduit } from "@/lib/product.mapper";
+import { getSellerDisplayName, getSellerInitials } from "@/lib/seller.utils";
+import { Produit } from "@/types/models.types";
 
 interface ProductDetailProps {
   productId: number;
   onClose?: () => void;
+  showChat?: boolean;
 }
 
-export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose }) => {
-  const { startNegotiation, isLoading: chatLoading } = useChat();
+export const ProductDetail: React.FC<ProductDetailProps> = ({
+  productId,
+  onClose,
+  showChat = false,
+}) => {
+  const { openChatForProduct, isLoading: chatLoading } = useChat();
   const [product, setProduct] = useState<Produit | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,20 +37,32 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose
     let cancelled = false;
     setIsLoading(true);
     setError(null);
-    productApi.fetchProductById(productId)
-      .then((data) => { if (!cancelled) setProduct(data); })
-      .catch((err: unknown) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Erreur de chargement du produit');
+    productApi
+      .fetchProductById(productId)
+      .then((data) => {
+        if (!cancelled) setProduct(data);
       })
-      .finally(() => { if (!cancelled) setIsLoading(false); });
-    return () => { cancelled = true; };
+      .catch((err: unknown) => {
+        if (!cancelled)
+          setError(
+            err instanceof Error
+              ? err.message
+              : "Erreur de chargement du produit",
+          );
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [productId]);
 
-  const handleContactSeller = async () => {
+  const handleContactSeller = () => {
     if (!product) return;
     const sellerId = getSellerIdFromProduit(product);
     if (!sellerId) return;
-    await startNegotiation(product.idProduit, sellerId);
+    openChatForProduct(product.idProduit, sellerId);
   };
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -45,7 +70,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose
   };
 
   const timeAgo = (() => {
-    if (!product) return '';
+    if (!product) return "";
     const now = new Date();
     const pub = new Date(product.datePublication);
     const diffMs = now.getTime() - pub.getTime();
@@ -55,7 +80,11 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose
     if (diffH < 24) return `il y a ${diffH}h`;
     const diffD = Math.floor(diffH / 24);
     if (diffD < 30) return `il y a ${diffD}j`;
-    return pub.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+    return pub.toLocaleDateString("fr-FR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
   })();
 
   const modalContent = () => {
@@ -74,14 +103,18 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose
             <AlertCircle size={24} className="text-red-500" />
           </div>
           <div>
-            <p className="font-semibold text-zinc-900">Impossible de charger ce produit</p>
-            <p className="text-sm text-zinc-500 mt-1">{error || 'Produit introuvable'}</p>
+            <p className="font-semibold text-zinc-900">
+              Impossible de charger ce produit
+            </p>
+            <p className="text-sm text-zinc-500 mt-1">
+              {error || "Produit introuvable"}
+            </p>
           </div>
         </div>
       );
     }
 
-    const isAvailable = product.statut === 'DISPONIBLE';
+    const isAvailable = product.statut === "DISPONIBLE";
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 max-h-[85vh] overflow-y-auto">
@@ -99,7 +132,9 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose
               <div className="rounded-3xl p-6 bg-[#EDE8DC]">
                 <Package size={40} className="text-[#c4b89a]" />
               </div>
-              <span className="text-xs font-medium tracking-widest text-[#b3a78f] uppercase">Pas d&apos;image</span>
+              <span className="text-xs font-medium tracking-widest text-[#b3a78f] uppercase">
+                Pas d&apos;image
+              </span>
             </div>
           )}
 
@@ -115,8 +150,10 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose
           {/* Overlay statut */}
           {!isAvailable && (
             <div className="absolute inset-0 flex items-center justify-center backdrop-blur-[2px] bg-black/35">
-              <span className={`rounded-full px-6 py-2.5 text-sm font-bold uppercase tracking-wider shadow-lg text-white ${product.statut === 'RESERVE' ? 'bg-[#F2700B]' : 'bg-zinc-950'}`}>
-                {product.statut === 'RESERVE' ? 'Réservé' : 'Vendu'}
+              <span
+                className={`rounded-full px-6 py-2.5 text-sm font-bold uppercase tracking-wider shadow-lg text-white ${product.statut === "RESERVE" ? "bg-[#F2700B]" : "bg-zinc-950"}`}
+              >
+                {product.statut === "RESERVE" ? "Réservé" : "Vendu"}
               </span>
             </div>
           )}
@@ -127,16 +164,20 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose
           {/* Prix */}
           <div>
             <p className="text-3xl font-extrabold tracking-tight text-zinc-950">
-              {product.prix.toLocaleString('fr-FR')}&nbsp;
+              {product.prix.toLocaleString("fr-FR")}&nbsp;
               <span className="text-lg font-bold text-zinc-500">F CFA</span>
             </p>
           </div>
 
           {/* Nom */}
-          <h2 className="text-xl font-bold text-zinc-900 leading-snug">{product.nom}</h2>
+          <h2 className="text-xl font-bold text-zinc-900 leading-snug">
+            {product.nom}
+          </h2>
 
           {/* Description */}
-          <p className="text-sm text-zinc-600 leading-relaxed flex-1">{product.description}</p>
+          <p className="text-sm text-zinc-600 leading-relaxed flex-1">
+            {product.description}
+          </p>
 
           {/* Méta-infos */}
           <div className="flex flex-col gap-2 text-xs text-zinc-500 border-t border-[#d9cdb8]/40 pt-4">
@@ -166,17 +207,11 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose
           <div className="mt-auto pt-2">
             <button
               onClick={handleContactSeller}
-              disabled={!isAvailable || chatLoading}
+              disabled={!isAvailable}
               className="w-full flex items-center justify-center gap-2.5 rounded-xl bg-gradient-to-r from-[#F2700B] to-[#e05a00] py-3.5 text-[14px] font-bold text-white shadow-lg shadow-orange-500/15 hover:shadow-orange-500/30 active:scale-[0.98] transition-all duration-300 disabled:opacity-40 disabled:pointer-events-none"
             >
-              {chatLoading ? (
-                <Loader2 size={17} className="animate-spin" />
-              ) : (
-                <>
-                  <MessageCircle size={17} />
-                  Contacter le vendeur
-                </>
-              )}
+              <MessageCircle size={17} />
+              Contacter le vendeur
             </button>
             {!isAvailable && (
               <p className="mt-2 text-center text-xs text-zinc-500">
@@ -189,22 +224,20 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose
     );
   };
 
-  // ── Mode popup (overlay) quand onClose est fourni ──
+  // ── Mode split view (avec onClose) ──
   if (onClose) {
     return (
-      <div
-        ref={overlayRef}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fadeIn"
-        onClick={handleOverlayClick}
-      >
-        <div className="relative w-full max-w-3xl rounded-3xl bg-white shadow-2xl overflow-hidden">
-          {/* Bouton fermer */}
+      <div className="max-w-4xl mx-auto">
+        <div className="flex items-center justify-between mb-4">
           <button
             onClick={onClose}
-            className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 backdrop-blur-md shadow-sm text-zinc-500 hover:text-zinc-900 transition-colors"
+            className="flex items-center gap-2 rounded-full px-4 py-2 bg-white border border-[#d9cdb8] text-zinc-700 hover:bg-zinc-50 transition-colors"
           >
             <X size={18} />
+            Fermer
           </button>
+        </div>
+        <div className="overflow-hidden rounded-3xl bg-white shadow-sm border border-[#d9cdb8]/40">
           {modalContent()}
         </div>
       </div>

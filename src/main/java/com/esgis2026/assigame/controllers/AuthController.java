@@ -1,11 +1,13 @@
 package com.esgis2026.assigame.controllers;
 
 import com.esgis2026.assigame.dto.LoginRequest;
+import com.esgis2026.assigame.dto.JwtAuthResponse;
 import com.esgis2026.assigame.dto.UtilisateurResponse;
 import com.esgis2026.assigame.entities.Utilisateur;
 import com.esgis2026.assigame.exceptions.UnauthorizedException;
 import com.esgis2026.assigame.mappers.UtilisateurMapper;
 import com.esgis2026.assigame.repositories.UtilisateurRepository;
+import com.esgis2026.assigame.security.JwtUtils;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,15 +23,17 @@ public class AuthController {
     private final UtilisateurRepository utilisateurRepository;
     private final PasswordEncoder passwordEncoder;
     private final UtilisateurMapper utilisateurMapper;
+    private final JwtUtils jwtUtils;
 
-    public AuthController(UtilisateurRepository utilisateurRepository, PasswordEncoder passwordEncoder, UtilisateurMapper utilisateurMapper) {
+    public AuthController(UtilisateurRepository utilisateurRepository, PasswordEncoder passwordEncoder, UtilisateurMapper utilisateurMapper, JwtUtils jwtUtils) {
         this.utilisateurRepository = utilisateurRepository;
         this.passwordEncoder = passwordEncoder;
         this.utilisateurMapper = utilisateurMapper;
+        this.jwtUtils = jwtUtils;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UtilisateurResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<JwtAuthResponse> login(@Valid @RequestBody LoginRequest request) {
         Utilisateur user = utilisateurRepository.findByLogin(request.getLogin())
                 .or(() -> utilisateurRepository.findByEmail(request.getLogin()))
                 .orElseThrow(() -> new UnauthorizedException("Identifiants incorrects"));
@@ -42,7 +46,10 @@ public class AuthController {
             throw new UnauthorizedException("Identifiants incorrects");
         }
 
-        return ResponseEntity.ok(utilisateurMapper.toResponse(user));
+        String token = jwtUtils.generateJwtToken(user.getLogin());
+        UtilisateurResponse utilisateurResponse = utilisateurMapper.toResponse(user);
+
+        return ResponseEntity.ok(new JwtAuthResponse(token, utilisateurResponse));
     }
 }
 
