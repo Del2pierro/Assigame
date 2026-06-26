@@ -16,9 +16,7 @@
  * Route PROTÉGÉE — Rôle ADMIN requis.
  */
 
-export const metadata = {
-  title: "Modération des produits — Admin Assigame",
-};
+"use client";
 
 import { useEffect, useState } from "react";
 import { Trash2, Search, ExternalLink } from "lucide-react";
