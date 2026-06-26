@@ -1,7 +1,7 @@
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 
 // Configuration de base pour l'URL WebSocket
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8081/ws';
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8080/ws';
 
 class StompClientService {
   private client: Client | null = null;
