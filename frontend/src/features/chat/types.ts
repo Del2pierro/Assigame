@@ -6,7 +6,7 @@ export interface StompSendPayload {
   conversationId: number;
   senderId: string;
   senderType: SenderType;
-  content: string;
+  contenu: string;
 }
 
 export interface CreateConversationPayload {
@@ -15,12 +15,18 @@ export interface CreateConversationPayload {
   productId: number;
 }
 
+export interface PendingConversation {
+  productId: number;
+  sellerId: number;
+}
+
 export interface ChatState {
   isSidebarOpen: boolean;
   activeConversationId: number | null;
   conversations: Conversation[];
   messages: Record<number, Message[]>;
   wsStatus: WsStatus;
+  pendingConversation: PendingConversation | null;
   
   // Actions
   setSidebarOpen: (isOpen: boolean) => void;
@@ -30,5 +36,6 @@ export interface ChatState {
   setMessages: (conversationId: number, messages: Message[]) => void;
   appendMessage: (message: Message) => void;
   setWsStatus: (status: WsStatus) => void;
+  setPendingConversation: (pending: PendingConversation | null) => void;
   clearChat: () => void;
 }

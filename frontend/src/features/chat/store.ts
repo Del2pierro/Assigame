@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { ChatState, WsStatus } from './types';
+import { ChatState, WsStatus, PendingConversation } from './types';
 import { Conversation, Message } from '@/types/models.types';
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -8,6 +8,7 @@ export const useChatStore = create<ChatState>((set) => ({
   conversations: [],
   messages: {},
   wsStatus: 'DISCONNECTED',
+  pendingConversation: null,
 
   setSidebarOpen: (isOpen: boolean) => set({ isSidebarOpen: isOpen }),
   
@@ -43,11 +44,14 @@ export const useChatStore = create<ChatState>((set) => ({
   
   setWsStatus: (status: WsStatus) => set({ wsStatus: status }),
   
+  setPendingConversation: (pending: PendingConversation | null) => set({ pendingConversation: pending }),
+  
   clearChat: () => set({
     isSidebarOpen: false,
     activeConversationId: null,
     conversations: [],
     messages: {},
-    wsStatus: 'DISCONNECTED'
+    wsStatus: 'DISCONNECTED',
+    pendingConversation: null
   })
 }));

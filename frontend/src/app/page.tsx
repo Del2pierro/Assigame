@@ -250,16 +250,26 @@ export default function HomePage() {
         </footer>
       </div>
 
-      {/* Chat toujours monté pour la connexion WebSocket */}
-      <ChatSidebar />
-
-      {/* ── Popup détail produit global ── */}
+      {/* ── Split view: Product Detail + Chat ── */}
       {selectedProductId && (
-        <ProductDetail
-          productId={selectedProductId}
-          onClose={() => setSelectedProductId(null)}
-        />
+        <div className="fixed inset-0 z-50 flex bg-black/50 backdrop-blur-sm">
+          {/* Product Detail - Left side */}
+          <div className="flex-1 h-full overflow-y-auto">
+            <ProductDetail
+              productId={selectedProductId}
+              onClose={() => setSelectedProductId(null)}
+            />
+          </div>
+
+          {/* Chat Sidebar - Right side (no overlay in split view) */}
+          <div className="w-full sm:w-[400px] h-full">
+            <ChatSidebar showOverlay={false} />
+          </div>
+        </div>
       )}
+
+      {/* Chat sidebar for other contexts (always mounted for WebSocket) */}
+      {!selectedProductId && <ChatSidebar showOverlay={true} />}
     </div>
   );
 }

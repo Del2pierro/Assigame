@@ -45,6 +45,12 @@ const IconEye = ({ crossed }: { crossed?: boolean }) => (
   </svg>
 );
 
+const IconArrowLeft = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M19 12H5M12 19l-7-7 7-7" />
+  </svg>
+);
+
 // ─── Sous-composants décoratifs ───────────────────────────────────────────────
 const BackgroundDecorations = () => (
   <>
@@ -106,7 +112,7 @@ const BackgroundDecorations = () => (
     ))}
 
     {/* Carte du Togo */}
-    <div style={{ position: 'absolute', top: '50%', left: '18%', transform: 'translate(-50%, -50%)', width: 420, height: 360, overflow: 'hidden', zIndex: 0, opacity: 0.55, pointerEvents: 'none' }}>
+    <div style={{ position: 'absolute', top: '50%', left: '18%', transform: 'translate(-50%, -50%)', width: 420, height: 360, overflow: 'hidden', zIndex: 1, opacity: 0.55, pointerEvents: 'none' }}>
       <img src={`data:image/png;base64,${TOGO_MAP_B64}`} alt="" style={{ width: '100%', display: 'block' }} />
     </div>
 
@@ -180,6 +186,42 @@ export const LoginForm: React.FC = () => {
           textAlign: 'center',
         }}
       >
+        {/* Bouton retour */}
+        <Link
+          href="/"
+          style={{
+            position: 'absolute',
+            top: 20,
+            left: 20,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            padding: '8px 16px',
+            borderRadius: 20,
+            background: '#F8F5EE',
+            border: '1px solid #d8cfb8',
+            color: '#666',
+            textDecoration: 'none',
+            fontSize: 13,
+            fontWeight: 500,
+            fontFamily: 'Arial, Helvetica, sans-serif',
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = '#F0E9D9';
+            e.currentTarget.style.borderColor = '#F2700B';
+            e.currentTarget.style.color = '#F2700B';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = '#F8F5EE';
+            e.currentTarget.style.borderColor = '#d8cfb8';
+            e.currentTarget.style.color = '#666';
+          }}
+        >
+          <IconArrowLeft />
+          Retour
+        </Link>
+
         {/* Logo ASSIGAMÉ */}
         <div style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontWeight: 800, fontSize: 26, letterSpacing: 1, color: '#1a1a1a', marginTop: 6 }}>
           ASSIGAMÉ

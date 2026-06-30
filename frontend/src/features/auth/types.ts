@@ -15,7 +15,10 @@ export interface RegisterPayload {
   adresse?: string;
 }
 
-export type AuthResponse = Utilisateur;
+export interface AuthResponse {
+  token: string;
+  user: Utilisateur;
+}
 
 export interface AuthFormState {
   isSubmitting: boolean;

@@ -20,6 +20,9 @@ public class ChatWebSocketController {
 
     @MessageMapping("/chat.send")
     public void send(MessageRequest request) {
+        // Permettre aux guest users d'envoyer des messages
+        // La validation est faite au niveau du service via validateSenderParticipant
+        
         // Enregistrement du message
         MessageResponse response = messageService.saveMessage(request);
         

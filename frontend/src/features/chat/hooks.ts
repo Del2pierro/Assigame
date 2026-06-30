@@ -47,6 +47,7 @@ export const useChat = () => {
   const conversations = useChatStore((s) => s.conversations);
   const messages = useChatStore((s) => s.messages);
   const wsStatus = useChatStore((s) => s.wsStatus);
+  const pendingConversation = useChatStore((s) => s.pendingConversation);
   const setSidebarOpen = useChatStore((s) => s.setSidebarOpen);
   const setActiveConversation = useChatStore((s) => s.setActiveConversation);
 
@@ -60,8 +61,31 @@ export const useChat = () => {
       const data = await chatApi.loadSellerConversations(sellerId);
       useChatStore.getState().setConversations(data);
     } catch (err) {
-      console.error('Failed to load conversations', err);
       setChatError(err instanceof Error ? err.message : 'Impossible de charger les conversations');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const openChatForProduct = useCallback(async (productId: number, sellerId: number) => {
+    try {
+      setIsLoading(true);
+      setChatError(null);
+      const buyerId = ensureBuyerId();
+      const payload: CreateConversationPayload = { buyerId, sellerId, productId };
+      const conversation = await chatApi.initiateConversation(payload);
+      
+      const state = useChatStore.getState();
+      state.addConversation(conversation);
+      state.setActiveConversation(conversation.idConversation);
+      state.setPendingConversation(null);
+      state.setSidebarOpen(true);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Impossible de charger la conversation';
+      setChatError(msg);
+      if (typeof window !== 'undefined') {
+        window.alert(`Erreur Chat: ${msg}`);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -79,7 +103,6 @@ export const useChat = () => {
       state.setActiveConversation(conversation.idConversation);
       state.setSidebarOpen(true);
     } catch (err) {
-      console.error('Failed to start negotiation', err);
       const msg = err instanceof Error ? err.message : 'Impossible de démarrer la conversation';
       setChatError(msg);
       if (typeof window !== 'undefined') {
@@ -95,22 +118,28 @@ export const useChat = () => {
 
     const topic = `/topic/conversation/${activeConversationId}`;
 
-    stompClient.subscribe(topic, (stompMessage: IMessage) => {
-      try {
-        const raw = JSON.parse(stompMessage.body) as BackendMessageResponse;
-        useChatStore.getState().appendMessage(normalizeMessage(raw));
-      } catch (err) {
-        console.error('Failed to parse incoming message', err);
-      }
-    });
+    // Petit délai pour s'assurer que le client STOMP est prêt
+    const timeoutId = setTimeout(() => {
+      stompClient.subscribe(topic, (stompMessage: IMessage) => {
+        try {
+          const raw = JSON.parse(stompMessage.body) as BackendMessageResponse;
+          useChatStore.getState().appendMessage(normalizeMessage(raw));
+        } catch (err) {
+          // Error parsing message - silently ignore
+        }
+      });
+    }, 100);
 
     chatApi.loadMessageHistory(activeConversationId)
       .then((res) => {
         useChatStore.getState().setMessages(activeConversationId, [...res.content].reverse());
       })
-      .catch((err) => console.error('Failed to load messages', err));
+      .catch((err) => {
+        // Error loading message history - silently ignore
+      });
 
     return () => {
+      clearTimeout(timeoutId);
       stompClient.unsubscribe(topic);
     };
   }, [activeConversationId, wsStatus]);
@@ -146,10 +175,44 @@ export const useChat = () => {
       conversationId: convId,
       senderId,
       senderType,
-      content: content.trim(),
+      contenu: content.trim(),
     };
 
     stompClient.publish('/app/chat.send', payload);
+  }, []);
+
+  const sendMessageWithConversation = useCallback(async (content: string, productId: number, sellerId: number) => {
+    if (!content.trim()) return;
+
+    try {
+      setIsLoading(true);
+      setChatError(null);
+
+      // Create conversation first
+      const buyerId = ensureBuyerId();
+      const payload: CreateConversationPayload = { buyerId, sellerId, productId };
+      const conversation = await chatApi.initiateConversation(payload);
+
+      const state = useChatStore.getState();
+      state.addConversation(conversation);
+      state.setActiveConversation(conversation.idConversation);
+      state.setPendingConversation(null);
+
+      // Send the message
+      const stompPayload: StompSendPayload = {
+        conversationId: conversation.idConversation,
+        senderId: buyerId,
+        senderType: 'BUYER',
+        contenu: content.trim(),
+      };
+
+      stompClient.publish('/app/chat.send', stompPayload);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Impossible d\'envoyer le message';
+      setChatError(msg);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   return {
@@ -158,12 +221,15 @@ export const useChat = () => {
     conversations,
     messages,
     wsStatus,
+    pendingConversation,
     setSidebarOpen,
     setActiveConversation,
     isLoading,
     chatError,
     loadConversations,
+    openChatForProduct,
     startNegotiation,
     sendMessage,
+    sendMessageWithConversation,
   };
 };

@@ -18,7 +18,7 @@ public class MessageMapper {
         }
         response.setSenderType(entity.getSenderType());
         response.setSenderId(entity.getSenderId());
-        response.setContent(entity.getContenu());
+        response.setContenu(entity.getContenu());
         response.setDateEnvoi(entity.getDateEnvoi());
         return response;
     }

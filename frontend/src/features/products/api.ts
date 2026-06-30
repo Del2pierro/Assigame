@@ -1,23 +1,18 @@
 import { productService } from '@/services/product.service';
 import { Produit } from '@/types/models.types';
 import { ProductFormPayload } from '@/lib/product.mapper';
-import { enrichProductsWithSellers } from '@/lib/seller.utils';
 
 export const productApi = {
   fetchAllProducts: async (): Promise<Produit[]> => {
-    const products = await productService.getAll();
-    return enrichProductsWithSellers(products);
+    return productService.getAll();
   },
 
   fetchProductsByCategory: async (categoryId: number): Promise<Produit[]> => {
-    const products = await productService.getByCategory(categoryId);
-    return enrichProductsWithSellers(products);
+    return productService.getByCategory(categoryId);
   },
 
   fetchProductById: async (id: number): Promise<Produit> => {
-    const product = await productService.getById(id);
-    const [enriched] = await enrichProductsWithSellers([product]);
-    return enriched;
+    return productService.getById(id);
   },
 
   createProduct: async (

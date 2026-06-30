@@ -28,6 +28,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (typeof window !== 'undefined') {
       localStorage.removeItem('user_id');
       localStorage.removeItem('user_profile');
+      localStorage.removeItem('jwt_token');
     }
     set({ user: null, isAuthenticated: false });
   },
