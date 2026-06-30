@@ -49,6 +49,6 @@ public class MessageRequest {
      * Must not be blank.
      */
     @NotBlank(message = "Le contenu du message ne peut pas être vide.")
-    private String content;
+    private String contenu;
 }
 

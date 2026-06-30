@@ -102,7 +102,7 @@ class MessagingServiceTest {
         request.setConversationId(100L);
         request.setSenderType(SenderType.BUYER);
         request.setSenderId(buyerId);
-        request.setContent("Bonjour !");
+        request.setContenu("Bonjour !");
 
         when(conversationRepository.findById(100L)).thenReturn(Optional.of(conversation));
         when(messageRepository.save(any(Message.class))).thenAnswer(invocation -> {
@@ -115,7 +115,7 @@ class MessagingServiceTest {
 
         assertNotNull(response);
         assertEquals(1000L, response.getIdMessage());
-        assertEquals("Bonjour !", response.getContent());
+        assertEquals("Bonjour !", response.getContenu());
     }
 
     @Test
@@ -124,7 +124,7 @@ class MessagingServiceTest {
         request.setConversationId(100L);
         request.setSenderType(SenderType.BUYER);
         request.setSenderId("hacker-buyer"); // Différent du buyerId de la conversation
-        request.setContent("Bonjour !");
+        request.setContenu("Bonjour !");
 
         when(conversationRepository.findById(100L)).thenReturn(Optional.of(conversation));
 

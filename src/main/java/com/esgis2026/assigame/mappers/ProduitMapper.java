@@ -3,15 +3,18 @@ package com.esgis2026.assigame.mappers;
 import com.esgis2026.assigame.dto.ProduitRequest;
 import com.esgis2026.assigame.dto.ProduitResponse;
 import com.esgis2026.assigame.entities.Produit;
+import com.esgis2026.assigame.mappers.UtilisateurMapper;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ProduitMapper {
 
     private final CategorieProduitMapper categorieProduitMapper;
+    private final UtilisateurMapper utilisateurMapper;
 
-    public ProduitMapper(CategorieProduitMapper categorieProduitMapper) {
+    public ProduitMapper(CategorieProduitMapper categorieProduitMapper, UtilisateurMapper utilisateurMapper) {
         this.categorieProduitMapper = categorieProduitMapper;
+        this.utilisateurMapper = utilisateurMapper;
     }
 
     public ProduitResponse toResponse(Produit entity) {
@@ -27,7 +30,7 @@ public class ProduitMapper {
         response.setDateAjout(entity.getDateAjout());
         response.setStatut(entity.getStatut());
         if (entity.getUtilisateur() != null) {
-            response.setIdUtilisateur(entity.getUtilisateur().getIdUtilisateur());
+            response.setUtilisateur(utilisateurMapper.toResponse(entity.getUtilisateur()));
         }
         response.setCategorie(categorieProduitMapper.toResponse(entity.getCategorieProduit()));
         return response;

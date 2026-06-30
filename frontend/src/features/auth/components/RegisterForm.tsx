@@ -82,6 +82,12 @@ const IconEye = ({ crossed }: { crossed?: boolean }) => (
   </svg>
 );
 
+const IconArrowLeft = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M19 12H5M12 19l-7-7 7-7" />
+  </svg>
+);
+
 // ─── Décorations de fond (réutilisées depuis LoginForm) ───────────────────────
 const BackgroundDecorations = () => (
   <>
@@ -383,12 +389,48 @@ export const RegisterForm: React.FC = () => {
           background: "#EDE8DC",
           borderRadius: 28,
           padding: "48px 56px 40px",
-          width: 460,
+          width: 520,
           maxWidth: "95vw",
           boxShadow: "0 25px 50px -12px rgba(0,0,0,0.18)",
           textAlign: "center",
         }}
       >
+        {/* Bouton retour */}
+        <Link
+          href="/login"
+          style={{
+            position: 'absolute',
+            top: 20,
+            left: 20,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            padding: '8px 16px',
+            borderRadius: 20,
+            background: '#F8F5EE',
+            border: '1px solid #d8cfb8',
+            color: '#666',
+            textDecoration: 'none',
+            fontSize: 13,
+            fontWeight: 500,
+            fontFamily: 'Arial, Helvetica, sans-serif',
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = '#F0E9D9';
+            e.currentTarget.style.borderColor = '#F2700B';
+            e.currentTarget.style.color = '#F2700B';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = '#F8F5EE';
+            e.currentTarget.style.borderColor = '#d8cfb8';
+            e.currentTarget.style.color = '#666';
+          }}
+        >
+          <IconArrowLeft />
+          Retour
+        </Link>
+
         {/* Logo ASSIGAMÉ */}
         <div
           style={{
@@ -499,224 +541,188 @@ export const RegisterForm: React.FC = () => {
         )}
 
         <form onSubmit={onSubmit}>
-          {/* Nom complet */}
-          <div
-            style={{
-              position: "relative",
-              marginBottom: 18,
-              textAlign: "left",
-            }}
-          >
-            <span style={iconLeftStyle}>
-              <IconUser />
-            </span>
-            <input
-              id="register-nom"
-              type="text"
-              placeholder="Nom complet"
-              required
-              value={nom}
-              onChange={(e) => setNom(e.target.value)}
-              style={inputStyle}
-            />
+          {/* Grille 2 colonnes pour les champs principaux */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 18 }}>
+            {/* Nom */}
+            <div style={{ position: 'relative', textAlign: 'left' }}>
+              <span style={iconLeftStyle}>
+                <IconUser />
+              </span>
+              <input
+                id="register-nom"
+                type="text"
+                placeholder="Nom"
+                required
+                value={nom}
+                onChange={(e) => setNom(e.target.value)}
+                style={inputStyle}
+              />
+            </div>
+
+            {/* Prénom */}
+            <div style={{ position: 'relative', textAlign: 'left' }}>
+              <span style={iconLeftStyle}>
+                <IconUser />
+              </span>
+              <input
+                id="register-prenom"
+                type="text"
+                placeholder="Prénom"
+                required
+                value={prenom}
+                onChange={(e) => setPrenom(e.target.value)}
+                style={inputStyle}
+              />
+            </div>
           </div>
 
-          {/* Prénom */}
-          <div
-            style={{
-              position: "relative",
-              marginBottom: 18,
-              textAlign: "left",
-            }}
-          >
-            <span style={iconLeftStyle}>
-              <IconUser />
-            </span>
-            <input
-              id="register-prenom"
-              type="text"
-              placeholder="Prénom"
-              required
-              value={prenom}
-              onChange={(e) => setPrenom(e.target.value)}
-              style={inputStyle}
-            />
+          {/* Grille 2 colonnes pour email et login */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 18 }}>
+            {/* Email */}
+            <div style={{ position: 'relative', textAlign: 'left' }}>
+              <span style={iconLeftStyle}>
+                <IconMail />
+              </span>
+              <input
+                id="register-email"
+                type="email"
+                placeholder="Adresse e-mail"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={inputStyle}
+              />
+            </div>
+
+            {/* Login (pseudo) */}
+            <div style={{ position: 'relative', textAlign: 'left' }}>
+              <span style={iconLeftStyle}>
+                <IconUser />
+              </span>
+              <input
+                id="register-login"
+                type="text"
+                placeholder="Nom d'utilisateur"
+                required
+                value={login}
+                onChange={(e) => setLogin(e.target.value)}
+                style={inputStyle}
+              />
+            </div>
           </div>
 
-          {/* Email */}
-          <div
-            style={{
-              position: "relative",
-              marginBottom: 18,
-              textAlign: "left",
-            }}
-          >
-            <span style={iconLeftStyle}>
-              <IconMail />
-            </span>
-            <input
-              id="register-email"
-              type="email"
-              placeholder="Adresse e-mail"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={inputStyle}
-            />
-          </div>
-
-          {/* Login (pseudo) */}
-          <div
-            style={{
-              position: "relative",
-              marginBottom: 18,
-              textAlign: "left",
-            }}
-          >
-            <span style={iconLeftStyle}>
-              <IconUser />
-            </span>
-            <input
-              id="register-login"
-              type="text"
-              placeholder="Nom d'utilisateur (pseudo)"
-              required
-              value={login}
-              onChange={(e) => setLogin(e.target.value)}
-              style={inputStyle}
-            />
-          </div>
-
-          {/* Mot de passe */}
-          <div
-            style={{
-              position: "relative",
-              marginBottom: 18,
-              textAlign: "left",
-            }}
-          >
-            <span style={iconLeftStyle}>
-              <IconLock />
-            </span>
-            <input
-              id="register-password"
-              type={showPassword ? "text" : "password"}
-              placeholder="Mot de passe"
-              required
-              value={motDePasse}
-              onChange={(e) => setMotDePasse(e.target.value)}
-              style={inputStyle}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((s) => !s)}
-              style={eyeBtnStyle}
-              aria-label={
-                showPassword
-                  ? "Masquer le mot de passe"
-                  : "Afficher le mot de passe"
-              }
-            >
-              <IconEye crossed={showPassword} />
-            </button>
-          </div>
-
-          {/* Confirmer le mot de passe */}
-          <div
-            style={{
-              position: "relative",
-              marginBottom: 18,
-              textAlign: "left",
-            }}
-          >
-            <span style={iconLeftStyle}>
-              <IconLock />
-            </span>
-            <input
-              id="register-confirm-password"
-              type={showConfirm ? "text" : "password"}
-              placeholder="Confirmer le mot de passe"
-              required
-              value={confirmPassword}
-              onChange={(e) => {
-                setConfirmPassword(e.target.value);
-                if (confirmError) setConfirmError(null);
-              }}
-              style={inputStyle}
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirm((s) => !s)}
-              style={eyeBtnStyle}
-              aria-label={
-                showConfirm
-                  ? "Masquer la confirmation"
-                  : "Afficher la confirmation"
-              }
-            >
-              <IconEye crossed={showConfirm} />
-            </button>
-          </div>
-
-          {/* Téléphone (optionnel) */}
-          <div
-            style={{
-              position: "relative",
-              marginBottom: 18,
-              textAlign: "left",
-            }}
-          >
-            <span style={iconLeftStyle}>
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
+          {/* Grille 2 colonnes pour les mots de passe */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 18 }}>
+            {/* Mot de passe */}
+            <div style={{ position: 'relative', textAlign: 'left' }}>
+              <span style={iconLeftStyle}>
+                <IconLock />
+              </span>
+              <input
+                id="register-password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Mot de passe"
+                required
+                value={motDePasse}
+                onChange={(e) => setMotDePasse(e.target.value)}
+                style={inputStyle}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((s) => !s)}
+                style={eyeBtnStyle}
+                aria-label={
+                  showPassword
+                    ? "Masquer le mot de passe"
+                    : "Afficher le mot de passe"
+                }
               >
-                <path d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 013.07 5.18 2 2 0 015.05 3h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L9.09 10.9a16 16 0 006.01 6.01l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 17z" />
-              </svg>
-            </span>
-            <input
-              id="register-telephone"
-              type="tel"
-              placeholder="Téléphone (optionnel)"
-              value={telephone}
-              onChange={(e) => setTelephone(e.target.value)}
-              style={inputStyle}
-            />
+                <IconEye crossed={showPassword} />
+              </button>
+            </div>
+
+            {/* Confirmer le mot de passe */}
+            <div style={{ position: 'relative', textAlign: 'left' }}>
+              <span style={iconLeftStyle}>
+                <IconLock />
+              </span>
+              <input
+                id="register-confirm-password"
+                type={showConfirm ? "text" : "password"}
+                placeholder="Confirmer"
+                required
+                value={confirmPassword}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  if (confirmError) setConfirmError(null);
+                }}
+                style={inputStyle}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm((s) => !s)}
+                style={eyeBtnStyle}
+                aria-label={
+                  showConfirm
+                    ? "Masquer la confirmation"
+                    : "Afficher la confirmation"
+                }
+              >
+                <IconEye crossed={showConfirm} />
+              </button>
+            </div>
           </div>
 
-          {/* Adresse (optionnelle) */}
-          <div
-            style={{
-              position: "relative",
-              marginBottom: 18,
-              textAlign: "left",
-            }}
-          >
-            <span style={iconLeftStyle}>
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" />
-                <circle cx="12" cy="10" r="3" />
-              </svg>
-            </span>
-            <input
-              id="register-adresse"
-              type="text"
-              placeholder="Adresse (optionnelle)"
-              value={adresse}
-              onChange={(e) => setAdresse(e.target.value)}
-              style={inputStyle}
-            />
+          {/* Grille 2 colonnes pour les champs optionnels */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 18 }}>
+            {/* Téléphone (optionnel) */}
+            <div style={{ position: 'relative', textAlign: 'left' }}>
+              <span style={iconLeftStyle}>
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 013.07 5.18 2 2 0 015.05 3h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L9.09 10.9a16 16 0 006.01 6.01l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 17z" />
+                </svg>
+              </span>
+              <input
+                id="register-telephone"
+                type="tel"
+                placeholder="Téléphone (optionnel)"
+                value={telephone}
+                onChange={(e) => setTelephone(e.target.value)}
+                style={inputStyle}
+              />
+            </div>
+
+            {/* Adresse (optionnelle) */}
+            <div style={{ position: 'relative', textAlign: 'left' }}>
+              <span style={iconLeftStyle}>
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+              </span>
+              <input
+                id="register-adresse"
+                type="text"
+                placeholder="Adresse (optionnelle)"
+                value={adresse}
+                onChange={(e) => setAdresse(e.target.value)}
+                style={inputStyle}
+              />
+            </div>
           </div>
 
           {/* Conditions d'utilisation */}

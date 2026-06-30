@@ -154,7 +154,7 @@ export default function AdminLayout({
 
     try {
       const profile = JSON.parse(profileRaw);
-      const role = profile?.typeUtilisateur?.libelle;
+      const role = profile?.typeUtilisateur?.libelle?.toUpperCase();
 
       // Vérifie que le rôle est bien ADMIN sans créer de boucle avec l'espace vendeur.
       if (role === "VENDEUR") {

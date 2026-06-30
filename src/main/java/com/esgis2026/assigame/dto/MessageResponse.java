@@ -46,7 +46,7 @@ public class MessageResponse {
     /**
      * The message content.
      */
-    private String content;
+    private String contenu;
     
     /**
      * Date and time when the message was sent.

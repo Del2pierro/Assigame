@@ -39,9 +39,13 @@ export const useLogin = () => {
       clearFormState();
 
       // Redirection selon le rôle
-      if (user.typeUtilisateur?.libelle === 'ADMIN') {
+      const role = user.typeUtilisateur?.libelle?.toUpperCase();
+      if (role === 'ADMIN') {
         router.push('/admin');
+      } else if (role === 'VENDEUR') {
+        router.push('/dashboard');
       } else {
+        // Fallback pour les autres rôles
         router.push('/dashboard');
       }
     } catch (err: unknown) {

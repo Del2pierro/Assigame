@@ -60,8 +60,15 @@ public class ProduitResponse {
     
     /**
      * ID of the user (seller) who published the product.
+     * @deprecated Use utilisateur instead for complete seller information
      */
+    @Deprecated
     private Long idUtilisateur;
+    
+    /**
+     * Complete user (seller) information who published the product.
+     */
+    private UtilisateurResponse utilisateur;
     
     /**
      * Product category information.

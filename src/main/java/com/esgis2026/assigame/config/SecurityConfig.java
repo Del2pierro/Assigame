@@ -76,6 +76,12 @@ public class SecurityConfig {
                 .requestMatchers("/api/categories").permitAll()
                 .requestMatchers("/api/categories/**").permitAll()
                 
+                // Chat endpoints - allow guest users to send messages
+                .requestMatchers("/api/conversations").permitAll()
+                .requestMatchers("/api/conversations/**").permitAll()
+                .requestMatchers("/api/messages").permitAll()
+                .requestMatchers("/api/messages/**").permitAll()
+                
                 // WebSocket endpoint
                 .requestMatchers("/ws/**").permitAll()
                 

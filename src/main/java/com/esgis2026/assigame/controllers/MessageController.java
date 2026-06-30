@@ -6,7 +6,6 @@ import com.esgis2026.assigame.services.MessageService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -41,7 +40,7 @@ public class MessageController {
     /**
      * Sends a message to a conversation.
      * <p>
-     * Requires authentication. The message is saved to the database and
+     * Allows guest users to send messages. The message is saved to the database and
      * broadcast in real-time via WebSocket to all participants subscribed
      * to the conversation topic.
      * </p>
@@ -50,7 +49,6 @@ public class MessageController {
      * @return ResponseEntity containing the sent message information
      */
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<MessageResponse> sendMessage(@Valid @RequestBody MessageRequest request) {
         MessageResponse response = messageService.saveMessage(request);
         // Diffusion temps réel via WebSocket STOMP
@@ -61,7 +59,7 @@ public class MessageController {
     /**
      * Retrieves messages for a specific conversation.
      * <p>
-     * Requires authentication. Supports pagination via query parameters.
+     * Allows guest users to retrieve messages. Supports pagination via query parameters.
      * If page parameter is provided, returns paginated results.
      * Otherwise, returns all messages for the conversation.
      * </p>
@@ -72,7 +70,6 @@ public class MessageController {
      * @return ResponseEntity containing message list (paginated or full)
      */
     @GetMapping("/{conversationId}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getMessages(
             @PathVariable Long conversationId,
             @RequestParam(value = "page", required = false) Integer page,

@@ -157,14 +157,14 @@ export default function DashboardLayout({
 
     try {
       const parsed = JSON.parse(profileRaw) as Utilisateur;
-      const role = parsed?.typeUtilisateur?.libelle;
+      const role = parsed?.typeUtilisateur?.libelle?.toUpperCase();
 
-      if (role === "admin") {
+      if (role === "ADMIN") {
         router.replace("/admin");
         return;
       }
 
-      if (role !== "vendeur") {
+      if (role !== "VENDEUR") {
         localStorage.removeItem("user_profile");
         localStorage.removeItem("user_id");
         router.replace("/login");

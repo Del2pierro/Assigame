@@ -6,7 +6,7 @@ export interface StompSendPayload {
   conversationId: number;
   senderId: string;
   senderType: SenderType;
-  content: string;
+  contenu: string;
 }
 
 export interface CreateConversationPayload {
