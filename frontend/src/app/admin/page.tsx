@@ -17,9 +17,47 @@
  * Route PROTÉGÉE — Rôle ADMIN requis (via AdminLayout).
  */
 
-export const metadata = {
-  title: "Administration — Assigame",
-};
+"use client";
+
+import { useEffect } from "react";
+import { Users, UserCheck, UserX, Package, ShoppingBag, Tag } from "lucide-react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip as RechartsTooltip,
+  Legend,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from "recharts";
+import { useAdminStore } from "@/features/admin/store";
+import { fetchAllUsers, fetchAllProductsAdmin, fetchAllCategories } from "@/features/admin/api";
+
+function StatCard({ label, value, icon, accentColor = "#F2700B" }: {
+  label: string;
+  value: number;
+  icon: React.ReactNode;
+  accentColor?: string;
+}) {
+  return (
+    <div className="bg-[#EDE8DC] p-4 rounded-xl border border-[#d9cdb8] flex items-center gap-4 transition-transform hover:-translate-y-1 shadow-sm">
+      <div
+        className="w-12 h-12 rounded-full flex items-center justify-center text-white"
+        style={{ backgroundColor: accentColor }}
+      >
+        {icon}
+      </div>
+      <div>
+        <div className="text-2xl font-black text-[#111111]">{value}</div>
+        <div className="text-xs text-[#666666] font-medium uppercase tracking-wider">{label}</div>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminDashboardPage() {
   const {

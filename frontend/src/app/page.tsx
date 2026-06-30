@@ -231,6 +231,23 @@ export default function HomePage() {
             />
           )}
         </main>
+
+        {/* ── Footer ── */}
+        <footer className="mt-12 py-8 border-t border-[#d9cdb8]/30 bg-[#F0E9D9]/30">
+          <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-zinc-500 font-medium">
+              © {new Date().getFullYear()} Assigamé. Tous droits réservés.
+            </p>
+            <div className="flex items-center gap-6">
+              <Link
+                href="/a-propos"
+                className="text-sm font-semibold text-zinc-600 hover:text-[#F2700B] transition-colors"
+              >
+                À propos
+              </Link>
+            </div>
+          </div>
+        </footer>
       </div>
 
       {/* ── Split view: Product Detail + Chat ── */}
